@@ -1,0 +1,10 @@
+"use client";
+import {useRef,useState} from "react";
+import {Download,HardDrive,Upload} from "lucide-react";
+import {downloadBackup,readBackup,restoreLocal} from "../../lib/orbit/backup";
+import {Modal} from "./ui";
+export default function Backup({close,done}:{close:()=>void;done:()=>void}){
+ const input=useRef<HTMLInputElement>(null),[pending,setPending]=useState<Awaited<ReturnType<typeof readBackup>>>(),[busy,setBusy]=useState(false),[error,setError]=useState("");
+ return <Modal title="Journal backup" close={()=>{if(!busy)close();}}><div className="modal-body form-stack"><p className="body-note">This edition saves on this browser and web address. A backup includes your observations, pictures, plans, and learning notes.</p><button className="button secondary" disabled={busy} onClick={async()=>{setBusy(true);setError("");try{await downloadBackup();}catch(e){setError(e instanceof Error?e.message:"Download failed. Try again.");}finally{setBusy(false);}}}><Download size={16}/>Download backup</button><button className="button secondary" disabled={busy} onClick={()=>input.current?.click()}><Upload size={16}/>Choose a backup to restore</button><input hidden type="file" accept=".json,application/json" ref={input} onChange={async ev=>{const f=ev.target.files?.[0];if(!f)return;setPending(undefined);setBusy(true);setError("");try{setPending(await readBackup(f));}catch{setError("Choose a valid Orbit Journal backup file.");}finally{setBusy(false);}}}/>{pending&&<div className="detail-callout"><div><HardDrive size={16}/>Restore {pending.entries.filter(e=>!e.deleted).length} saved entries and {pending.images.size} pictures?</div><p>This replaces the journal saved in this browser with the selected backup.</p><button className="button primary mini" disabled={busy} onClick={async()=>{setBusy(true);try{await restoreLocal(pending.entries,pending.images);done();}catch{setError("The restore could not finish. Your existing journal is still saved.");}finally{setBusy(false);}}}>Restore this backup</button></div>}{error&&<div className="form-error" role="alert">{error}</div>}</div></Modal>;
+}
+

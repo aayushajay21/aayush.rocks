@@ -1,0 +1,37 @@
+"use client";
+import {useEffect,useRef,useState,type ReactNode} from "react";
+import {ArrowRight,CalendarDays,Check,ChevronLeft,ChevronRight,Clock3,Compass,ExternalLink,Orbit,Plus,Search,Star,X,type LucideIcon} from "lucide-react";
+import {displayDate,displayMedia,Entry,shiftDate,weekRange} from "../../lib/orbit/model";
+import {artFor,totalMinutes} from "../../lib/orbit/starter";
+import {localImage} from "../../lib/orbit/local";
+import {useOrbit} from "./context";
+export function Brand(){return <span className="brand-mark" aria-hidden="true"><img src="./favicon.svg" alt=""/></span>;}
+export function Action({children,onClick,icon:Icon=Plus,secondary=false,disabled=false}:{children:ReactNode;onClick:()=>void;icon?:LucideIcon;secondary?:boolean;disabled?:boolean}){return <button type="button" className={secondary?"button secondary":"button primary"} onClick={onClick} disabled={disabled}><Icon size={16}/>{children}</button>;}
+export function TextLink({children,onClick}:{children:ReactNode;onClick:()=>void}){return <button className="text-link" type="button" onClick={onClick}>{children}<ArrowRight size={15}/></button>;}
+export function IconTile({icon:Icon,color="purple",small=false}:{icon:LucideIcon;color?:string;small?:boolean}){return <span className={"icon-tile "+color+(small?" small":"")}><Icon size={small?18:21} strokeWidth={1.75}/></span>;}
+export function PanelHeading({icon:Icon,title,subtitle,action,color="purple"}:{icon:LucideIcon;title:string;subtitle?:string;action?:ReactNode;color?:string}){return <div className="panel-heading"><div className="heading-words"><div className="heading-title"><Icon size={20} className={"ink-"+color} strokeWidth={1.8}/><h2>{title}</h2></div>{subtitle&&<p>{subtitle}</p>}</div>{action}</div>;}
+export function PageTitle({title,intro,action}:{title:string;intro:string;action?:ReactNode}){return <div className="page-title"><div><h1>{title}</h1><p>{intro}</p></div>{action}</div>;}
+export function Empty({icon:Icon=Search,title,children,action}:{icon?:LucideIcon;title:string;children:ReactNode;action?:ReactNode}){return <div className="empty"><span className="empty-icon"><Icon size={29} strokeWidth={1.5}/></span><h3>{title}</h3><p>{children}</p>{action}</div>;}
+export function WeekNav(){const {week,setWeek,currentWeek}=useOrbit();return <div className="week-nav"><button className="icon-button" aria-label="Previous week" onClick={()=>setWeek(shiftDate(week,-7))}><ChevronLeft size={17}/></button><span><CalendarDays size={15}/>{weekRange(week)}, {week.slice(0,4)}</span><button className="icon-button" aria-label="Next week" onClick={()=>setWeek(shiftDate(week,7))}><ChevronRight size={17}/></button>{week!==currentWeek&&<button className="week-now" onClick={()=>setWeek(currentWeek)}>This week</button>}</div>;}
+export function Tabs({names}:{names:string[]}){const {filter,setFilter}=useOrbit();return <div className="tabs" aria-label="Filter entries">{names.map(n=><button key={n} className={filter===n?"selected":""} aria-pressed={filter===n} onClick={()=>setFilter(n)}>{n}</button>)}</div>;}
+export function Modal({title,children,close,wide=false}:{title:string;children:ReactNode;close:()=>void;wide?:boolean}){
+ const ref=useRef<HTMLDialogElement>(null);const closeRef=useRef(close);closeRef.current=close;
+ useEffect(()=>{const dialog=ref.current;dialog?.showModal();const previous=document.body.style.overflow;document.body.style.overflow="hidden";return()=>{document.body.style.overflow=previous;dialog?.close();};},[]);
+ return <dialog ref={ref} className={"modal "+(wide?"wide":"")} onCancel={e=>{e.preventDefault();closeRef.current();}} onClick={e=>{if(e.target===e.currentTarget){const r=e.currentTarget.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeRef.current();}}} aria-labelledby="modal-title"><div className="modal-head"><h2 id="modal-title">{title}</h2><button className="icon-button" onClick={close} aria-label="Close dialog"><X size={20}/></button></div>{children}</dialog>;
+}
+export function EntryImage({entry,className="",alt}:{entry:Entry;className?:string;alt?:string}){
+ const {local}=useOrbit(); const [url,setUrl]=useState("");
+ useEffect(()=>{if(!local||!entry.media)return;let alive=true,objectUrl="";localImage(entry.id).then(blob=>{if(alive&&blob){objectUrl=URL.createObjectURL(blob);setUrl(objectUrl);}}).catch(()=>{});return()=>{alive=false;if(objectUrl)URL.revokeObjectURL(objectUrl);};},[local,entry.id,entry.rev,entry.media]);
+ const src=local?url:displayMedia(entry);return src?<img className={className} src={src} alt={alt||entry.title}/>:<div className={"image-placeholder "+className}/>;
+}
+export function PlanSteps({plan,compact=false}:{plan:Entry;compact?:boolean}){
+ const {save,busy}=useOrbit();const steps=plan.steps||[];const done=steps.filter(s=>s.done).length;
+ return <><div className={"step-list "+(compact?"compact":"")}>{steps.map((s,i)=><button key={i} className={"step "+(s.done?"finished":"")} disabled={busy} aria-pressed={s.done} aria-label={(s.done?"Reopen ":"Complete ")+s.title} onClick={()=>void save({...plan,steps:steps.map((a,j)=>i===j?{...a,done:!a.done}:a)},s.done?"Step reopened.":"Step complete.")}><span className="step-check">{s.done&&<Check size={13}/>}</span><span className="step-copy"><strong>{s.title}</strong><span>{s.hint}</span></span><span className="minutes">{s.minutes} min</span></button>)}</div><div className="plan-progress"><div className="progress-track"><i style={{width:100*done/steps.length+"%"}}/></div><span>{done} of {steps.length} complete</span></div></>;
+}
+export function SkyTargets(){const {create}=useOrbit();return <article className="panel target-panel"><PanelHeading icon={Compass} color="cyan" title="Observation targets" subtitle="Choose a target to start a field note."/><div className="target-grid">{[{name:"Jupiter",type:"Planet",file:"jupiter"},{name:"Vega",type:"Star",file:"vega"}].map(t=><button className={"target-card "+t.file} key={t.name} onClick={()=>create("observation",t.name)} aria-label={"Log an observation of "+t.name}><div className="target-art"><img src={"./images/"+(t.file==="jupiter"?"jupiter-disc":"vega-close")+".webp"} alt=""/></div><span className="target-type">{t.type}</span><span className="target-caption"><strong>{t.name}</strong><span className="target-arrow"><ArrowRight size={14}/></span></span></button>)}</div></article>;}
+export function DiscoveryCard({entry}:{entry:Entry}){
+ const {show}=useOrbit(),art=artFor(entry);return <button className="discovery-card" onClick={()=>show(entry)}><div className={"news-thumb "+(art?"":"news-placeholder")}>{art?<img src={"./images/"+art.file+".webp"} alt={art.alt}/>:<Orbit size={52} strokeWidth={1}/>}<span className="image-tag">{entry.category||"Discovery"}</span>{entry.discussed&&<span className="discussed-check" aria-label="Discussed"><Check size={15}/></span>}</div><div className="news-copy"><div className="news-source">{entry.source}<span>·</span>{displayDate(entry.date)}</div><h3>{entry.title}</h3><span className="read-card">{entry.discussed?"Revisit discovery":"Discuss discovery"} <ArrowRight size={13}/></span></div></button>;
+}
+export function SkyMapLink(){return <a className="text-link" href="https://stellarium-web.org/" target="_blank" rel="noreferrer">Open sky map <ExternalLink size={13}/></a>;}
+export function Duration({plan}:{plan:Entry}){return <span className="duration"><Clock3 size={13}/>{totalMinutes(plan.steps)} min</span>;}
+
