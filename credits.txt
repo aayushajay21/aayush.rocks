@@ -1,0 +1,16 @@
+Orbit Journal image credits
+
+Observatory banner — original digital illustration.
+Jupiter — NASA/JPL/University of Arizona; Cassini composite PIA02873.
+https://science.nasa.gov/resource/high-resolution-globe-of-jupiter/
+Vega — Stephen Rahn, CC0.
+https://commons.wikimedia.org/wiki/File:Vega_by_Stephen_Rahn.jpg
+Gas giant transit illustration — ESA, NASA, STScI and M. Kornmesser. This represents a different planetary system.
+NGC 4559 — X-ray: NASA/CXC/University of Virginia/M. Aghakhanloo et al. Optical: SDSS. Processing: NASA/CXC/SAO/P. Edmonds.
+https://chandra.harvard.edu/photo/2026/at2016blu/
+Euclid gravitational lens montage — ESA/Euclid/Euclid Consortium/NASA, processed by N. Lines and T. Li. Resized for display. CC BY-SA 3.0 IGO.
+https://euclid.caltech.edu/download/AvmImage/90/binary/larger
+https://creativecommons.org/licenses/by-sa/3.0/igo/
+Inter font — the Inter Project Authors, SIL Open Font License 1.1, included in fonts/LICENSE.txt.
+Lucide icons — the Lucide contributors, ISC license.
+
