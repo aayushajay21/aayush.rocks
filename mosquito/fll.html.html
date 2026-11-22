@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Tiger Shield | FLL Asian Tiger Mosquito Research & Innovation Hub</title>
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Load Google Fonts: Inter & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          },
+          colors: {
+            lab: {
+              teal: '#0d9488',
+              emerald: '#059669',
+              dark: '#0f172a',
+              amber: '#d97706',
+              red: '#dc2626'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Smooth scrolling and custom scrollbar */
+    html { scroll-behavior: smooth; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* 3D Flashcard Flip */
+    .perspective { perspective: 1200px; }
+    .preserve-3d {
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+    }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+
+    /* Flashing Red LED Animation */
+    @keyframes led-blink {
+      0%, 100% { opacity: 1; filter: drop-shadow(0 0 8px #ef4444); }
+      50% { opacity: 0.25; filter: none; }
+    }
+    .animate-led-red {
+      animation: led-blink 0.9s ease-in-out infinite;
+    }
+
+    /* Rain Drop & Overflow Stream Animation */
+    @keyframes rain-dash {
+      to { stroke-dashoffset: -20; }
+    }
+    .animate-rain {
+      animation: rain-dash 0.45s linear infinite;
+    }
+
+    /* Subtle Fade In for Tab Switching */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeIn 0.25s ease-out; }
+
+    /* Custom Range Slider Styling */
+    input[type="range"] {
+      accent-color: #0d9488;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Toast Notification Container (Replaces alert/confirm) -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-sm"></div>
+
+  <!-- ===================================================================== -->
+  <!-- STICKY HEADER & 5-TAB NAVIGATION BAR                                  -->
+  <!-- ===================================================================== -->
+  <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md text-white shadow-lg border-b border-teal-800/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <!-- Top Brand Row -->
+      <div class="py-3.5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <!-- Custom Inline SVG Logo -->
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-teal-500/30 to-emerald-600/30 border border-teal-400/40 flex items-center justify-center shrink-0">
+            <svg class="w-7 h-7 text-teal-300" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M32 6L52 14V30C52 43.5 43.5 54.5 32 58C20.5 54.5 12 43.5 12 30V14L32 6Z" fill="#0d9488" fill-opacity="0.25"/>
+              <ellipse cx="32" cy="34" rx="4" ry="10" fill="currentColor"/>
+              <circle cx="32" cy="21" r="3" fill="currentColor"/>
+              <path d="M32 18V12" stroke-linecap="round"/>
+              <path d="M28 29C20 24 16 27 21 33C23 36 27 34 28 32" stroke-linecap="round"/>
+              <path d="M36 29C44 24 48 27 43 33C41 36 37 34 36 32" stroke-linecap="round"/>
+              <path d="M29 38L21 47M35 38L43 47" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-teal-300">
+              <span>FIRST® LEGO® League</span>
+              <span class="text-slate-500">•</span>
+              <span>Innovation Project Hub</span>
+            </div>
+            <h1 class="font-display text-lg sm:text-xl font-bold tracking-tight text-white leading-tight">
+              Project Tiger Shield <span class="hidden sm:inline font-normal text-slate-400">|</span> <span class="hidden sm:inline italic text-teal-300 text-base">Aedes albopictus</span>
+            </h1>
+          </div>
+        </div>
+
+        <!-- Team Badge + Readiness Counter -->
+        <div class="flex items-center gap-3 bg-slate-800/90 border border-slate-700 rounded-2xl px-3.5 py-2">
+          <div>
+            <label for="team-name-input" class="block text-[10px] uppercase tracking-wider text-slate-400 font-bold">Team Name</label>
+            <input id="team-name-input" type="text" value="Tiger Shield Robotics"
+              class="bg-transparent text-xs sm:text-sm font-bold text-white border-b border-dashed border-teal-400/60 focus:outline-none focus:border-teal-300 w-36 sm:w-44"
+              aria-label="FLL Team Name" />
+          </div>
+          <div class="h-7 w-px bg-slate-700"></div>
+          <div class="text-right">
+            <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-bold">Judge Ready</span>
+            <span id="header-readiness-badge" class="text-xs sm:text-sm font-extrabold text-emerald-400">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5-Tab Navigation Bar -->
+      <nav class="flex gap-1.5 sm:gap-2 overflow-x-auto pb-3 pt-1 -mx-1 px-1" aria-label="Primary Navigation">
+        <button onclick="switchTab('invader')" id="tab-invader"
+          class="nav-tab flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm whitespace-nowrap transition-all bg-teal-500 text-slate-950 shadow-md">
+          <span>🦟</span> 1. Invader Profile
+        </button>
+        <button onclick="switchTab('backyard')" id="tab-backyard"
+          class="nav-tab flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm whitespace-nowrap transition-all bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white">
+          <span>🏡</span> 2. Backyard & Controls
+        </button>
+        <button onclick="switchTab('lab')" id="tab-lab"
+          class="nav-tab flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm whitespace-nowrap transition-all bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white">
+          <span>🧪</span> 3. Smart Ovitrap Lab
+        </button>
+        <button onclick="switchTab('research')" id="tab-research"
+          class="nav-tab flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm whitespace-nowrap transition-all bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white">
+          <span>📓</span> 4. Research & Notes
+        </button>
+        <button onclick="switchTab('judge')" id="tab-judge"
+          class="nav-tab flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm whitespace-nowrap transition-all bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white">
+          <span>🏆</span> 5. Judge Prep
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN CONTENT AREA                                                     -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-7 space-y-8">
+
+    <!-- =================================================================== -->
+    <!-- TAB 1: INVADER PROFILE (BIOLOGY & U.S. SPREAD)                      -->
+    <!-- =================================================================== -->
+    <section id="section-invader" class="tab-section fade-in space-y-8">
+
+      <!-- Hero Stat Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-teal-400 transition">
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Scientific Name</div>
+          <div class="font-display text-xl font-bold italic text-teal-700 mt-1">Aedes albopictus</div>
+          <div class="text-xs text-slate-600 mt-1">Also called the "Forest Mosquito" or Asian tiger mosquito</div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-teal-400 transition">
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-500">U.S. Arrival</div>
+          <div class="font-display text-xl font-bold text-slate-900 mt-1">1985 • Houston, TX</div>
+          <div class="text-xs text-slate-600 mt-1">Hitchhiked in shipments of used tires from Asia</div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-teal-400 transition">
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Flight Range</div>
+          <div class="font-display text-xl font-bold text-amber-600 mt-1">~200 Yards (180 m)</div>
+          <div class="text-xs text-slate-600 mt-1">Stays local—if it bites you, it bred nearby!</div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-teal-400 transition">
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Egg-to-Adult Cycle</div>
+          <div class="font-display text-xl font-bold text-rose-600 mt-1">7–10 Days</div>
+          <div class="text-xs text-slate-600 mt-1">Explosive reproduction during warm U.S. summers</div>
+        </div>
+      </div>
+
+      <!-- Identification Diagram + Key Traits -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-6 space-y-4">
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-100 text-teal-800">
+            Field Identification Guide
+          </span>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold text-slate-900">
+            How to Spot an Asian Tiger Mosquito
+          </h2>
+          <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+            Before a community can control an invasive species, residents need to recognize it. Unlike dull brown native mosquitoes that buzz around at night, <em class="italic font-semibold text-slate-800">Aedes albopictus</em> has unmistakable high-contrast markings and bold daytime behavior:
+          </p>
+          <ul class="space-y-3 text-sm text-slate-700">
+            <li class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center shrink-0 text-xs">1</span>
+              <span><strong>Single Silver-White Dorsal Stripe:</strong> One crisp white line runs straight down the center of its jet-black back (thorax) and head.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center shrink-0 text-xs">2</span>
+              <span><strong>Black-and-White Banded Legs:</strong> Bright white rings wrap around its dark legs—giving it the "tiger" nickname.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0 text-xs">3</span>
+              <span><strong>Small Size (~1/4 inch / 2–10 mm):</strong> Smaller than many native marsh mosquitoes, making it agile and stealthy.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 font-bold flex items-center justify-center shrink-0 text-xs">4</span>
+              <span><strong>Aggressive Daytime Biter:</strong> Hunts all day long—especially early morning and late afternoon—often targeting ankles and elbows.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Custom Scientific SVG Identification Diagram -->
+        <div class="lg:col-span-6 bg-slate-900 rounded-2xl p-5 sm:p-6 text-white shadow-inner">
+          <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-teal-400 mb-3">
+            <span>Anatomical ID Blueprint</span>
+            <span class="text-slate-400">Scale: ~1/4 in (6 mm)</span>
+          </div>
+          <svg viewBox="0 0 420 250" class="w-full h-auto" role="img" aria-label="Anatomical diagram of Asian tiger mosquito showing single white dorsal stripe, banded legs, and proboscis">
+            <defs>
+              <pattern id="id-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1e293b" stroke-width="1"/>
+              </pattern>
+            </defs>
+            <rect width="420" height="250" rx="14" fill="url(#id-grid)"/>
+
+            <!-- Banded Legs -->
+            <g stroke-width="4.5" stroke-linecap="round" fill="none">
+              <!-- Front Legs -->
+              <path d="M188 108 L138 72 L105 42" stroke="#020617"/>
+              <path d="M188 108 L138 72 L105 42" stroke="#ffffff" stroke-dasharray="6 9"/>
+              <path d="M232 108 L282 72 L315 42" stroke="#020617"/>
+              <path d="M232 108 L282 72 L315 42" stroke="#ffffff" stroke-dasharray="6 9"/>
+              <!-- Mid Legs -->
+              <path d="M185 124 L128 128 L90 155" stroke="#020617"/>
+              <path d="M185 124 L128 128 L90 155" stroke="#ffffff" stroke-dasharray="6 9"/>
+              <path d="M235 124 L292 128 L330 155" stroke="#020617"/>
+              <path d="M235 124 L292 128 L330 155" stroke="#ffffff" stroke-dasharray="6 9"/>
+              <!-- Hind Legs -->
+              <path d="M192 142 L148 188 L112 222" stroke="#020617"/>
+              <path d="M192 142 L148 188 L112 222" stroke="#ffffff" stroke-dasharray="8 8"/>
+              <path d="M228 142 L272 188 L308 222" stroke="#020617"/>
+              <path d="M228 142 L272 188 L308 222" stroke="#ffffff" stroke-dasharray="8 8"/>
+            </g>
+
+            <!-- Translucent Wings -->
+            <ellipse cx="166" cy="144" rx="40" ry="12" transform="rotate(-26 166 144)" fill="#94a3b8" fill-opacity="0.32" stroke="#cbd5e1" stroke-width="1.2"/>
+            <ellipse cx="254" cy="144" rx="40" ry="12" transform="rotate(26 254 144)" fill="#94a3b8" fill-opacity="0.32" stroke="#cbd5e1" stroke-width="1.2"/>
+
+            <!-- Abdomen (Black with White Segments) -->
+            <ellipse cx="210" cy="172" rx="12" ry="38" fill="#090d16" stroke="#475569" stroke-width="1.5"/>
+            <line x1="199" y1="152" x2="221" y2="152" stroke="#ffffff" stroke-width="2.5"/>
+            <line x1="198" y1="165" x2="222" y2="165" stroke="#ffffff" stroke-width="2.5"/>
+            <line x1="199" y1="178" x2="221" y2="178" stroke="#ffffff" stroke-width="2.5"/>
+            <line x1="201" y1="191" x2="219" y2="191" stroke="#ffffff" stroke-width="2.5"/>
+
+            <!-- Thorax with Signature Single White Stripe -->
+            <ellipse cx="210" cy="116" rx="17" ry="22" fill="#090d16" stroke="#64748b" stroke-width="1.5"/>
+            <line x1="210" y1="96" x2="210" y2="136" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+
+            <!-- Head, Eyes, Antennae & Proboscis -->
+            <circle cx="210" cy="88" r="9" fill="#090d16" stroke="#64748b" stroke-width="1"/>
+            <line x1="210" y1="81" x2="210" y2="93" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="210" y1="79" x2="210" y2="42" stroke="#e2e8f0" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M204 82 Q194 68 186 58" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
+            <path d="M216 82 Q226 68 234 58" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
+
+            <!-- Callouts -->
+            <line x1="215" y1="108" x2="295" y2="95" stroke="#2dd4bf" stroke-width="1.5"/>
+            <circle cx="215" cy="108" r="3" fill="#2dd4bf"/>
+            <text x="300" y="92" fill="#2dd4bf" font-size="11" font-weight="bold">Single Silver-White</text>
+            <text x="300" y="105" fill="#2dd4bf" font-size="11" font-weight="bold">Dorsal Stripe</text>
+
+            <line x1="126" y1="208" x2="72" y2="208" stroke="#fbbf24" stroke-width="1.5"/>
+            <circle cx="126" cy="208" r="3" fill="#fbbf24"/>
+            <text x="12" y="204" fill="#fbbf24" font-size="11" font-weight="bold">Banded</text>
+            <text x="12" y="217" fill="#fbbf24" font-size="11" font-weight="bold">Tiger Legs</text>
+
+            <line x1="212" y1="54" x2="288" y2="42" stroke="#f87171" stroke-width="1.5"/>
+            <circle cx="212" cy="54" r="3" fill="#f87171"/>
+            <text x="292" y="39" fill="#f87171" font-size="11" font-weight="bold">Daytime Biting</text>
+            <text x="292" y="52" fill="#f87171" font-size="11" font-weight="bold">Proboscis (Female)</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Interactive 4-Stage Life Cycle Explorer -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+              Interactive Biology Explorer
+            </span>
+            <h2 class="font-display text-2xl font-bold text-slate-900 mt-1">
+              The 4-Stage Life Cycle (And Where Bti Strikes!)
+            </h2>
+            <p class="text-sm text-slate-600">Click each stage to explore how <em class="italic">Aedes albopictus</em> grows from egg to biting adult in just 7–10 days.</p>
+          </div>
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">
+            <span>🎯</span> Target Stage for Our Smart Ovitrap: Stage 2 (Larva)
+          </div>
+        </div>
+
+        <!-- 4 Stage Selector Buttons -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <button onclick="selectLifeStage('egg')" id="stage-btn-egg"
+            class="stage-btn text-left p-4 rounded-2xl border-2 border-teal-500 bg-teal-50/70 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">🥚</span>
+              <span class="text-[11px] font-bold uppercase px-2 py-0.5 rounded-full bg-white text-teal-700 border border-teal-200">Stage 1</span>
+            </div>
+            <div class="font-display font-bold text-slate-900 mt-2">Egg</div>
+            <div class="text-xs text-slate-600">Drought-proof & sticky</div>
+          </button>
+
+          <button onclick="selectLifeStage('larva')" id="stage-btn-larva"
+            class="stage-btn text-left p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-emerald-400 transition-all relative">
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">🐛</span>
+              <span class="text-[11px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">🎯 Bti Target!</span>
+            </div>
+            <div class="font-display font-bold text-slate-900 mt-2">Larva ("Wiggler")</div>
+            <div class="text-xs text-slate-600">4–7 days in water</div>
+          </button>
+
+          <button onclick="selectLifeStage('pupa')" id="stage-btn-pupa"
+            class="stage-btn text-left p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-teal-400 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">🫧</span>
+              <span class="text-[11px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Stage 3</span>
+            </div>
+            <div class="font-display font-bold text-slate-900 mt-2">Pupa ("Tumbler")</div>
+            <div class="text-xs text-slate-600">1–2 days • Non-feeding</div>
+          </button>
+
+          <button onclick="selectLifeStage('adult')" id="stage-btn-adult"
+            class="stage-btn text-left p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-teal-400 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">🦟</span>
+              <span class="text-[11px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Stage 4</span>
+            </div>
+            <div class="font-display font-bold text-slate-900 mt-2">Adult Mosquito</div>
+            <div class="text-xs text-slate-600">Only females bite!</div>
+          </button>
+        </div>
+
+        <!-- Stage Detail Display Panel -->
+        <div id="stage-detail-panel" class="rounded-2xl p-6 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          <div class="md:col-span-3 flex flex-col items-center justify-center bg-white rounded-2xl p-5 border border-slate-200 text-center">
+            <div id="stage-icon" class="text-5xl mb-2">🥚</div>
+            <div id="stage-duration" class="text-xs font-extrabold uppercase tracking-wider text-teal-700 bg-teal-50 px-3 py-1 rounded-full">Survives Months Dry</div>
+          </div>
+          <div class="md:col-span-9 space-y-2.5">
+            <div class="flex flex-wrap items-center gap-2">
+              <h3 id="stage-title" class="font-display text-xl font-bold text-slate-900">Stage 1: Drought-Resistant "Sticky" Eggs</h3>
+              <span id="stage-badge" class="hidden px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white">🎯 EXACT BTI TARGET STAGE</span>
+            </div>
+            <p id="stage-desc" class="text-sm sm:text-base text-slate-700 leading-relaxed">
+              Females glue individual black eggs onto the damp inner walls of containers just above the waterline. Even if the water evaporates completely or a homeowner dumps the cup out, these eggs survive drying out and freezing winter temperatures (a resting state called <strong>diapause</strong>) for months—hatching the moment rain refills the container!
+            </p>
+            <div id="stage-project-link" class="p-3.5 rounded-xl bg-teal-50 border border-teal-200 text-xs sm:text-sm text-teal-900 font-medium">
+              <strong>How Our Project Uses This:</strong> Our Smart Bti Ovitrap provides a dark, textured wooden strip that tricks females into gluing their eggs inside our trap instead of hidden gutters!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- U.S. Invasion History & Public Health Impact -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center gap-2 text-teal-700 font-bold text-xs uppercase tracking-wider">
+            <span>🇺🇸</span> U.S. Invasion History
+          </div>
+          <h3 class="font-display text-xl font-bold text-slate-900">From One Tire Shipment to 40+ States</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            Native to Southeast Asia, <em class="italic">Aedes albopictus</em> was first discovered established in the continental U.S. in <strong>Houston, Texas in 1985</strong> inside imported used tires that held rainwater and dormant eggs. Because highways moved used tires and potted plants across the country—and because its eggs can survive freezing winters in diapause—it rapidly colonized more than <strong>40 U.S. states</strong>, thriving across the East Coast, Midwest, and South.
+          </p>
+          <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs text-slate-700 space-y-1">
+            <div><strong>Why Suburbs Are Its Favorite Habitat:</strong></div>
+            <p>Shaded patios, kids' toys, rain barrels, and corrugated downspout pipes create thousands of predator-free "mini-ponds" per square mile—with zero fish or frogs to eat the larvae.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center gap-2 text-rose-600 font-bold text-xs uppercase tracking-wider">
+            <span>🩺</span> Public Health Impact
+          </div>
+          <h3 class="font-display text-xl font-bold text-slate-900">More Than Just an Itchy Backyard Nuisance</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            In addition to ruining outdoor play and sports during daylight hours, the Asian tiger mosquito is a competent <strong>disease vector</strong>—meaning it can pick up and spread serious viruses and parasites to both people and pets:
+          </p>
+          <div class="grid grid-cols-2 gap-2.5 pt-1 text-xs font-semibold">
+            <div class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900">🦠 Dengue &amp; Zika Viruses</div>
+            <div class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900">🦠 Chikungunya Virus</div>
+            <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">🧠 West Nile &amp; La Crosse</div>
+            <div class="p-3 rounded-xl bg-teal-50 border border-teal-200 text-teal-900">🐾 Dog Heartworm</div>
+          </div>
+          <p class="text-xs text-slate-500 pt-1">
+            Because it bites both humans and animals, scientists call it a "bridge vector" capable of moving diseases between wildlife and neighborhoods.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 2: BACKYARD & CONTROLS (WHY CURRENT METHODS FAIL)               -->
+    <!-- =================================================================== -->
+    <section id="section-backyard" class="tab-section hidden fade-in space-y-8">
+
+      <!-- Interactive Hidden Micro-Container Spotter -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800">
+              Interactive Backyard Detective
+            </span>
+            <h2 class="font-display text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
+              Hidden Micro-Container Spotter
+            </h2>
+            <p class="text-sm text-slate-600">
+              Click each everyday backyard item to discover why Asian tiger mosquitoes love it—and how little water it takes to hatch dozens of biters!
+            </p>
+          </div>
+          <div class="flex items-center gap-3 bg-teal-50 border border-teal-200 rounded-2xl px-4 py-3 shrink-0">
+            <span class="text-2xl">🔍</span>
+            <div>
+              <div class="text-[11px] font-bold uppercase text-teal-700">Hotspots Found</div>
+              <div id="hotspot-counter" class="font-display text-lg font-extrabold text-teal-900">0 / 8 Discovered</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8 Clickable Backyard Items Grid -->
+        <div id="hotspot-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Comparison Table: Why Standard Control Methods Struggle -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-5">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-100 text-rose-800">
+            FLL Research Analysis • Existing Solutions
+          </span>
+          <h2 class="font-display text-2xl font-bold text-slate-900 mt-1">
+            Why Standard Control Methods Struggle vs. Our Innovation
+          </h2>
+          <p class="text-sm text-slate-600">
+            FLL judges look for teams that prove they researched existing solutions and pinpointed the exact gap their prototype solves.
+          </p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="border-b-2 border-slate-200 text-slate-600 bg-slate-50">
+                <th class="py-3.5 px-4 font-bold rounded-tl-xl">Control Method</th>
+                <th class="py-3.5 px-4 font-bold">How It Works</th>
+                <th class="py-3.5 px-4 font-bold">Major Limitations / Gaps</th>
+                <th class="py-3.5 px-4 font-bold rounded-tr-xl">Pollinator Safety</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr class="hover:bg-slate-50/70">
+                <td class="py-4 px-4 font-bold text-slate-900">🚛 Municipal Evening Spray Trucks</td>
+                <td class="py-4 px-4 text-slate-600">Ultra-low volume insecticide mist sprayed from streets at dusk/night.</td>
+                <td class="py-4 px-4 text-rose-700 font-medium">Misses daytime-biting Asian tiger mosquitoes resting in dense backyard bushes; trucks cannot enter fenced yards.</td>
+                <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Moderate Risk</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50/70">
+                <td class="py-4 px-4 font-bold text-slate-900">💨 Commercial Yard Fogging</td>
+                <td class="py-4 px-4 text-slate-600">Broad-spectrum barrier chemicals sprayed onto yard foliage every 2–3 weeks.</td>
+                <td class="py-4 px-4 text-rose-700 font-medium">Expensive ($70+/visit), temporary relief, and kills beneficial insects like honeybees, butterflies, and fireflies.</td>
+                <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">Harmful to Bees</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50/70">
+                <td class="py-4 px-4 font-bold text-slate-900">🪣 Standard Unmonitored Ovitraps</td>
+                <td class="py-4 px-4 text-slate-600">Dark cups of water placed in yards to attract egg-laying females.</td>
+                <td class="py-4 px-4 text-rose-700 font-medium">If homeowners forget to check or refill them, water evaporates or larvicide expires—accidentally creating a mosquito factory!</td>
+                <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Safe</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50/70">
+                <td class="py-4 px-4 font-bold text-slate-900">🧬 Wolbachia / Sterile Male Releases</td>
+                <td class="py-4 px-4 text-slate-600">Releases lab-raised, non-biting male mosquitoes so wild female eggs never hatch.</td>
+                <td class="py-4 px-4 text-amber-800 font-medium">Great eco-friendly science, but requires specialized labs, high municipal budgets, and tough neighborhood-by-neighborhood distribution.</td>
+                <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Very Safe</span></td>
+              </tr>
+              <tr class="bg-teal-50/80 border-2 border-teal-400">
+                <td class="py-4 px-4 font-extrabold text-teal-900">⭐ Our Innovation: Smart Bti Ovitrap</td>
+                <td class="py-4 px-4 text-slate-800 font-medium">Lures females into a dark container with Bti larvicide + copper water-level probes &amp; 30-day timer LED.</td>
+                <td class="py-4 px-4 text-emerald-800 font-bold">Targets backyard micro-containers directly, costs ~$6.75, and alerts homeowners BEFORE water dries out or Bti expires!</td>
+                <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">100% Bee &amp; Pet Safe</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 3: SMART OVITRAP LAB (INTERACTIVE PROTOTYPE & SIMULATOR)        -->
+    <!-- =================================================================== -->
+    <section id="section-lab" class="tab-section hidden fade-in space-y-8">
+
+      <!-- Side-by-Side Cutaway Diagram + Judge Demo Simulator -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-100 text-teal-800">
+            Interactive Engineering Prototype
+          </span>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
+            Smart Bti Ovitrap Cutaway &amp; Judge Demo Simulator
+          </h2>
+          <p class="text-sm text-slate-600">
+            Click any numbered part on the trap to inspect its design, or move the sliders on the right to simulate how our smart sensor responds during a live FLL judge demo!
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <!-- LEFT SIDE: Interactive SVG Cross-Section -->
+          <div class="lg:col-span-6 space-y-4">
+            <div class="bg-slate-900 rounded-3xl p-5 sm:p-6 flex flex-col items-center relative overflow-hidden">
+              <svg viewBox="0 0 400 355" class="w-full max-w-md h-auto" role="img" aria-label="Interactive cross-section of Smart Bti Ovitrap">
+                <defs>
+                  <!-- Clip path matching exact inside of tapered cup so water fills cleanly -->
+                  <clipPath id="cup-interior-clip">
+                    <polygon points="103,82 267,82 246,306 124,306" />
+                  </clipPath>
+                </defs>
+
+                <!-- Rain Clouds & Falling Rain (Shown during Heavy Rain simulation) -->
+                <g id="svg-rain-top" class="hidden">
+                  <path d="M120 26 Q135 8 160 16 Q180 4 205 16 Q225 10 240 26 Z" fill="#64748b"/>
+                  <line x1="138" y1="30" x2="132" y2="70" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="5 5" class="animate-rain"/>
+                  <line x1="165" y1="30" x2="159" y2="70" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="5 5" class="animate-rain"/>
+                  <line x1="192" y1="30" x2="186" y2="70" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="5 5" class="animate-rain"/>
+                  <line x1="218" y1="30" x2="212" y2="70" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="5 5" class="animate-rain"/>
+                </g>
+
+                <!-- Patio / Ground Base -->
+                <rect x="35" y="310" width="330" height="12" rx="6" fill="#334155"/>
+
+                <!-- Matte-Black Container Body -->
+                <polygon points="98,80 272,80 250,310 120,310" fill="#1e293b" stroke="#64748b" stroke-width="3"/>
+
+                <!-- Dynamic Water Fill (Clipped to Cup Interior) -->
+                <g clip-path="url(#cup-interior-clip)">
+                  <rect id="svg-water-rect" x="95" y="160" width="180" height="150" fill="#0ea5e9" fill-opacity="0.52"/>
+                  <!-- Water Surface Highlight Line -->
+                  <line id="svg-water-line" x1="95" y1="160" x2="275" y2="160" stroke="#7dd3fc" stroke-width="2.5"/>
+                </g>
+
+                <!-- Slotted Squirrel-Proof Mesh Lid (V2 Upgrade) -->
+                <rect x="88" y="64" width="194" height="16" rx="6" fill="#475569" stroke="#cbd5e1" stroke-width="1.8"/>
+                <line x1="115" y1="64" x2="115" y2="80" stroke="#0f172a" stroke-width="4.5"/>
+                <line x1="145" y1="64" x2="145" y2="80" stroke="#0f172a" stroke-width="4.5"/>
+                <line x1="175" y1="64" x2="175" y2="80" stroke="#0f172a" stroke-width="4.5"/>
+                <line x1="205" y1="64" x2="205" y2="80" stroke="#0f172a" stroke-width="4.5"/>
+                <line x1="235" y1="64" x2="235" y2="80" stroke="#0f172a" stroke-width="4.5"/>
+
+                <!-- 1/4-Inch Rain Overflow Holes (1.5" below rim) -->
+                <circle cx="102" cy="128" r="6" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+                <circle cx="268" cy="128" r="6" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+
+                <!-- Overflow Water Streams (Shown during Heavy Rain) -->
+                <g id="svg-rain-overflow" class="hidden">
+                  <path d="M96 128 Q62 155 58 308" stroke="#38bdf8" stroke-width="3.5" stroke-dasharray="6 4" fill="none" class="animate-rain"/>
+                  <path d="M274 128 Q305 155 312 308" stroke="#38bdf8" stroke-width="3.5" stroke-dasharray="6 4" fill="none" class="animate-rain"/>
+                </g>
+
+                <!-- Textured Wooden / Paper Egg-Laying Strip -->
+                <rect x="130" y="114" width="16" height="145" rx="3" transform="rotate(-6 130 114)" fill="#d97706" stroke="#fde68a" stroke-width="1.2"/>
+                <!-- Sticky Egg Cluster Dots -->
+                <circle cx="137" cy="150" r="2" fill="#0f172a"/>
+                <circle cx="141" cy="153" r="2" fill="#0f172a"/>
+                <circle cx="136" cy="156" r="2" fill="#0f172a"/>
+                <circle cx="140" cy="159" r="2" fill="#0f172a"/>
+
+                <!-- Bottom Bti Briquette Chamber -->
+                <rect x="148" y="286" width="74" height="18" rx="7" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+                <text x="185" y="298" text-anchor="middle" fill="#92400e" font-size="9.5" font-weight="bold">Bti Briquette</text>
+
+                <!-- Two Copper Water-Level Probe Wires (Trigger at ~30% water) -->
+                <line x1="226" y1="92" x2="220" y2="240" stroke="#f97316" stroke-width="3.2" stroke-linecap="round"/>
+                <line x1="236" y1="92" x2="230" y2="240" stroke="#eab308" stroke-width="3.2" stroke-linecap="round"/>
+                <!-- Wire connection into Controller -->
+                <path d="M226 92 L286 92 M236 92 L286 102" stroke="#f97316" stroke-width="2" fill="none"/>
+
+                <!-- External micro:bit / LEGO SPIKE Controller Housing -->
+                <rect x="284" y="76" width="92" height="72" rx="12" fill="#0f172a" stroke="#94a3b8" stroke-width="2.2"/>
+                <text x="330" y="92" text-anchor="middle" fill="#94a3b8" font-size="8.5" font-weight="bold">SMART SENSOR</text>
+                <!-- Live Virtual LED Circle -->
+                <circle id="svg-led-circle" cx="330" cy="113" r="11" fill="#10b981"/>
+                <text id="svg-led-label" x="330" y="138" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold">ACTIVE OK</text>
+
+                <!-- Clickable Component Number Hotspots (1-6) -->
+                <g class="cursor-pointer" onclick="selectLabComponent(1)">
+                  <circle cx="185" cy="58" r="12" fill="#0d9488" stroke="#ffffff" stroke-width="2"/>
+                  <text x="185" y="62" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">1</text>
+                </g>
+                <g class="cursor-pointer" onclick="selectLabComponent(2)">
+                  <circle cx="80" cy="128" r="12" fill="#0d9488" stroke="#ffffff" stroke-width="2"/>
+                  <text x="80" y="132" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">2</text>
+                </g>
+                <g class="cursor-pointer" onclick="selectLabComponent(3)">
+                  <circle cx="138" cy="182" r="12" fill="#0d9488" stroke="#ffffff" stroke-width="2"/>
+                  <text x="138" y="186" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">3</text>
+                </g>
+                <g class="cursor-pointer" onclick="selectLabComponent(4)">
+                  <circle cx="185" cy="270" r="12" fill="#0d9488" stroke="#ffffff" stroke-width="2"/>
+                  <text x="185" y="274" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">4</text>
+                </g>
+                <g class="cursor-pointer" onclick="selectLabComponent(5)">
+                  <circle cx="228" cy="210" r="12" fill="#0d9488" stroke="#ffffff" stroke-width="2"/>
+                  <text x="228" y="214" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">5</text>
+                </g>
+                <g class="cursor-pointer" onclick="selectLabComponent(6)">
+                  <circle cx="330" cy="162" r="12" fill="#0d9488" stroke="#ffffff" stroke-width="2"/>
+                  <text x="330" y="166" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">6</text>
+                </g>
+              </svg>
+              <p class="text-xs text-slate-400 text-center mt-2">Tap any numbered badge (1–6) to inspect its engineering role.</p>
+            </div>
+
+            <!-- Component Engineering Inspector Box -->
+            <div class="bg-teal-50/70 border border-teal-200 rounded-2xl p-4 sm:p-5">
+              <div class="flex items-center gap-2.5 mb-1.5">
+                <span id="comp-num" class="w-7 h-7 rounded-full bg-teal-600 text-white font-bold text-xs flex items-center justify-center">1</span>
+                <h3 id="comp-title" class="font-display font-bold text-slate-900 text-base">Slotted Squirrel-Proof Mesh Lid &amp; Black Cup</h3>
+              </div>
+              <p id="comp-desc" class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                Asian tiger mosquitoes visually hunt for dark, shaded cavities. The matte-black HDPE container acts as a magnet, while the V2 slotted lid lets mosquitoes fly in to lay eggs while blocking squirrels, pets, and falling leaves.
+              </p>
+            </div>
+          </div>
+
+          <!-- RIGHT SIDE: Interactive Judge Demo Simulator -->
+          <div class="lg:col-span-6 space-y-5">
+            <div class="bg-slate-50 rounded-3xl p-6 border border-slate-200 space-y-6">
+              <div class="flex items-center justify-between">
+                <h3 class="font-display text-xl font-bold text-slate-900">🎛️ Judge Demo Simulator</h3>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-200 text-slate-700">Live Sensor Logic</span>
+              </div>
+
+              <!-- Virtual LED Status Readout -->
+              <div id="sim-led-card" class="rounded-2xl p-4 border-2 border-emerald-400 bg-emerald-50 flex items-center gap-4 transition-all">
+                <div id="sim-led-dot" class="w-10 h-10 rounded-full bg-emerald-500 shrink-0 shadow-md border-4 border-white"></div>
+                <div>
+                  <div id="sim-led-heading" class="font-display font-bold text-emerald-900 text-base">GREEN: Active &amp; Safe — Bti Dissolving</div>
+                  <div id="sim-led-sub" class="text-xs text-emerald-800 mt-0.5">Water bridges both copper probes and Bti briquette is within its 30-day window.</div>
+                </div>
+              </div>
+
+              <!-- Slider 1: Water Level -->
+              <div class="space-y-2">
+                <div class="flex justify-between items-center text-sm">
+                  <label for="water-slider" class="font-bold text-slate-800">💧 Water Level in Trap</label>
+                  <span id="water-val-badge" class="font-mono font-bold text-teal-700 bg-teal-100 px-2.5 py-0.5 rounded-lg">65%</span>
+                </div>
+                <input id="water-slider" type="range" min="0" max="100" value="65" oninput="updateSimulator()" class="w-full h-2.5 bg-slate-200 rounded-lg cursor-pointer" />
+                <div class="flex justify-between text-[11px] text-slate-500 font-medium">
+                  <span>0% (Dry)</span>
+                  <span class="text-rose-600 font-bold">30% Probe Cutoff</span>
+                  <span class="text-sky-600 font-bold">78% Overflow Holes</span>
+                  <span>100%</span>
+                </div>
+              </div>
+
+              <!-- Slider 2: Days Since Bti Refill -->
+              <div class="space-y-2">
+                <div class="flex justify-between items-center text-sm">
+                  <label for="days-slider" class="font-bold text-slate-800">📅 Days Since Bti Refill</label>
+                  <span id="days-val-badge" class="font-mono font-bold text-slate-700 bg-slate-200 px-2.5 py-0.5 rounded-lg">Day 10 / 30</span>
+                </div>
+                <input id="days-slider" type="range" min="0" max="35" value="10" oninput="updateSimulator()" class="w-full h-2.5 bg-slate-200 rounded-lg cursor-pointer" />
+                <div class="flex justify-between text-[11px] text-slate-500 font-medium">
+                  <span>Day 0 (Fresh Bti)</span>
+                  <span>Day 15</span>
+                  <span class="text-amber-600 font-bold">Day 30 (Replace!)</span>
+                  <span>Day 35</span>
+                </div>
+              </div>
+
+              <!-- Action Buttons: Heavy Rain & Reset -->
+              <div class="flex flex-wrap gap-3 pt-1">
+                <button onclick="toggleHeavyRain()" id="btn-heavy-rain"
+                  class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow-sm transition">
+                  <span>🌧️</span> Simulate Heavy Rain
+                </button>
+                <button onclick="resetSimulator()"
+                  class="px-4 py-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-bold text-sm transition">
+                  ↺ Reset
+                </button>
+              </div>
+            </div>
+
+            <!-- Component Quick Buttons -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <button onclick="selectLabComponent(1)" class="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-teal-500 text-left text-xs font-bold text-slate-700 transition">1. Slotted Lid &amp; Cup</button>
+              <button onclick="selectLabComponent(2)" class="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-teal-500 text-left text-xs font-bold text-slate-700 transition">2. Overflow Holes</button>
+              <button onclick="selectLabComponent(3)" class="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-teal-500 text-left text-xs font-bold text-slate-700 transition">3. Egg-Laying Strip</button>
+              <button onclick="selectLabComponent(4)" class="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-teal-500 text-left text-xs font-bold text-slate-700 transition">4. Bti Chamber</button>
+              <button onclick="selectLabComponent(5)" class="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-teal-500 text-left text-xs font-bold text-slate-700 transition">5. Copper Probes</button>
+              <button onclick="selectLabComponent(6)" class="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-teal-500 text-left text-xs font-bold text-slate-700 transition">6. Smart Controller</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Version 1 vs Version 2 Iteration Comparison -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-3">
+          <div class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase bg-slate-100 text-slate-700">Version 1 • Initial Prototype</div>
+          <h3 class="font-display text-xl font-bold text-slate-900">What We Built First (And What Went Wrong)</h3>
+          <ul class="space-y-2 text-sm text-slate-600 list-disc list-inside">
+            <li>Open-top 32 oz matte-black plastic cup with water, oak leaf attractant, and quarter Bti Mosquito Dunk.</li>
+            <li>Two bare jumper wires taped inside the cup connected to a micro:bit moisture alarm.</li>
+            <li class="text-rose-700 font-semibold">Field Feedback Flaw #1: Heavy rain could fill the cup to the rim and short-circuit the electronics.</li>
+            <li class="text-rose-700 font-semibold">Field Feedback Flaw #2: Squirrels, dogs, and falling autumn leaves could disturb the open water.</li>
+          </ul>
+        </div>
+
+        <div class="bg-gradient-to-br from-teal-50 to-emerald-50/70 rounded-3xl p-6 border-2 border-teal-400 shadow-sm space-y-3">
+          <div class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase bg-teal-600 text-white">Version 2 • Iterated Prototype</div>
+          <h3 class="font-display text-xl font-bold text-slate-900">How Feedback Made Our Design Stronger</h3>
+          <ul class="space-y-2 text-sm text-slate-800 list-disc list-inside">
+            <li><strong>Drilled Two 1/4-Inch Overflow Holes</strong> 1.5 inches below the rim so rain drains safely below the electronics.</li>
+            <li><strong>Added Slotted Mesh Lid</strong> that lets mosquitoes enter while blocking squirrels, pets, and leaves.</li>
+            <li><strong>Added 30-Day Bti Timer &amp; Amber LED</strong> so homeowners know exactly when to swap the Bti puck.</li>
+            <li><strong>Added Lid QR Code Sticker</strong> linking neighbors to a quick backyard hotspot reporting form.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Unit Cost Breakdown + Safe Bench Testing Plan -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Cost Table -->
+        <div class="lg:col-span-6 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-display text-xl font-bold text-slate-900">Production Unit Cost Estimate</h3>
+            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-sm">~$6.75 / Trap</span>
+          </div>
+          <table class="w-full text-sm text-left border-collapse">
+            <tbody class="divide-y divide-slate-100">
+              <tr>
+                <td class="py-2.5 font-semibold text-slate-800">Recycled Black HDPE Cup + Slotted Lid</td>
+                <td class="py-2.5 text-right font-mono font-bold text-slate-700">$1.25</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-semibold text-slate-800">Replaceable Cellulose Egg-Laying Strip</td>
+                <td class="py-2.5 text-right font-mono font-bold text-slate-700">$0.15</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-semibold text-slate-800">Dried Organic Oak-Leaf Lure Packet</td>
+                <td class="py-2.5 text-right font-mono font-bold text-slate-700">$0.10</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-semibold text-slate-800">30-Day Bti Briquette (Quarter Dunk)</td>
+                <td class="py-2.5 text-right font-mono font-bold text-slate-700">$0.75</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-semibold text-slate-800">Low-Power Water Probe + 30-Day LED Module</td>
+                <td class="py-2.5 text-right font-mono font-bold text-slate-700">$4.50</td>
+              </tr>
+              <tr class="border-t-2 border-teal-200 text-teal-800 font-extrabold text-base">
+                <td class="pt-3">Estimated Mass-Production Total</td>
+                <td class="pt-3 text-right font-mono">$6.75</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Safe Mosquito-Free Bench Testing Plan -->
+        <div class="lg:col-span-6 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-display text-xl font-bold text-slate-900">Safe Mosquito-Free Bench Tests</h3>
+            <span class="px-2.5 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-bold">Zero Live Bugs Needed</span>
+          </div>
+          <div class="space-y-3 text-sm">
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+              <div class="font-bold text-slate-900">1. Evaporation &amp; Alert Accuracy Test</div>
+              <p class="text-xs text-slate-600 mt-1">Place filled trap in a sunny window; log daily water drop (mm) and verify the Red LED flashes before the bottom Bti briquette dries out.</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+              <div class="font-bold text-slate-900">2. Heavy Rain Overflow Simulation</div>
+              <p class="text-xs text-slate-600 mt-1">Pour 2 full cups of water rapidly through the slotted lid and verify the 1/4-inch overflow holes drain excess water below the electronics housing.</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+              <div class="font-bold text-slate-900">3. Color Contrast &amp; Lure Check</div>
+              <p class="text-xs text-slate-600 mt-1">Compare matte-black vs. white cups outdoors for 5 days (then safely freeze/discard strips) to document visual attraction data for judges.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 4: RESEARCH & NOTES (SOURCES, INTERVIEWS & PERSISTENT LOG)      -->
+    <!-- =================================================================== -->
+    <section id="section-research" class="tab-section hidden fade-in space-y-8">
+
+      <!-- Verified External Research Sources -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-100 text-teal-800">
+            Credible FLL Research Sources
+          </span>
+          <h2 class="font-display text-2xl font-bold text-slate-900 mt-1">Verified Scientific Links for Student Research</h2>
+          <p class="text-sm text-slate-600">Cite these official government, university, and NASA resources in your judging binder.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <a href="https://www.cdc.gov/mosquitoes/about/about-aedes-mosquitoes.html" target="_blank" rel="noopener noreferrer"
+            class="group p-4 rounded-2xl border border-slate-200 hover:border-teal-500 hover:shadow-md transition flex flex-col justify-between bg-slate-50/50">
+            <div>
+              <div class="text-xs font-bold text-teal-700 uppercase">CDC • Public Health</div>
+              <div class="font-bold text-slate-900 group-hover:text-teal-700 mt-1">CDC: About Aedes Mosquitoes ↗</div>
+              <p class="text-xs text-slate-600 mt-1">Official life cycle, U.S. range maps, and disease transmission facts.</p>
+            </div>
+          </a>
+
+          <a href="https://www.epa.gov/mosquitocontrol/bti-mosquito-control" target="_blank" rel="noopener noreferrer"
+            class="group p-4 rounded-2xl border border-slate-200 hover:border-teal-500 hover:shadow-md transition flex flex-col justify-between bg-slate-50/50">
+            <div>
+              <div class="text-xs font-bold text-emerald-700 uppercase">U.S. EPA • Biopesticide</div>
+              <div class="font-bold text-slate-900 group-hover:text-teal-700 mt-1">EPA: Bti for Mosquito Control ↗</div>
+              <p class="text-xs text-slate-600 mt-1">Safety proof showing Bti targets only mosquito larvae—safe for pets &amp; bees.</p>
+            </div>
+          </a>
+
+          <a href="https://vectorbio.rutgers.edu/" target="_blank" rel="noopener noreferrer"
+            class="group p-4 rounded-2xl border border-slate-200 hover:border-teal-500 hover:shadow-md transition flex flex-col justify-between bg-slate-50/50">
+            <div>
+              <div class="text-xs font-bold text-rose-700 uppercase">Rutgers University • NJ</div>
+              <div class="font-bold text-slate-900 group-hover:text-teal-700 mt-1">Rutgers Center for Vector Biology ↗</div>
+              <p class="text-xs text-slate-600 mt-1">Leading U.S. research lab studying Asian tiger mosquitoes right in New Jersey.</p>
+            </div>
+          </a>
+
+          <a href="https://www.mosquito.org/" target="_blank" rel="noopener noreferrer"
+            class="group p-4 rounded-2xl border border-slate-200 hover:border-teal-500 hover:shadow-md transition flex flex-col justify-between bg-slate-50/50">
+            <div>
+              <div class="text-xs font-bold text-indigo-700 uppercase">AMCA • National Assoc.</div>
+              <div class="font-bold text-slate-900 group-hover:text-teal-700 mt-1">American Mosquito Control Assoc. ↗</div>
+              <p class="text-xs text-slate-600 mt-1">Integrated Mosquito Management (IMM) guides and local control districts.</p>
+            </div>
+          </a>
+
+          <a href="https://observer.globe.gov/do-globe-observer/mosquito-habitats" target="_blank" rel="noopener noreferrer"
+            class="group p-4 rounded-2xl border border-slate-200 hover:border-teal-500 hover:shadow-md transition flex flex-col justify-between bg-slate-50/50 sm:col-span-2 lg:col-span-2">
+            <div>
+              <div class="text-xs font-bold text-sky-700 uppercase">NASA Citizen Science</div>
+              <div class="font-bold text-slate-900 group-hover:text-teal-700 mt-1">NASA GLOBE Mosquito Habitat Mapper ↗</div>
+              <p class="text-xs text-slate-600 mt-1">Free citizen-science app allowing students to document and map standing-water breeding habitats safely!</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Expandable Entomologist Interview Question Bank -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-5">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800">
+            Expert Interview Toolkit
+          </span>
+          <h2 class="font-display text-2xl font-bold text-slate-900 mt-1">Entomologist Interview Question Bank (8 Questions)</h2>
+          <p class="text-sm text-slate-600">Click any question to see why FLL judges love hearing the answer from a county mosquito control inspector.</p>
+        </div>
+
+        <div id="interview-bank" class="space-y-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Persistent Team Research & Field Notes Log -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Add Note Form -->
+        <form id="note-form" onsubmit="addFieldNote(event)" class="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4 h-fit">
+          <div>
+            <h3 class="font-display text-xl font-bold text-slate-900">📓 Add Field Note</h3>
+            <p class="text-xs text-slate-500">Saves automatically in your browser's localStorage.</p>
+          </div>
+          <div>
+            <label for="note-category" class="block text-xs font-bold uppercase text-slate-500 mb-1">Category</label>
+            <select id="note-category" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:border-teal-500">
+              <option value="Biology Fact">🦟 Biology Fact</option>
+              <option value="Expert Quote">🧑‍🔬 Expert Quote</option>
+              <option value="Test Data">🧪 Test Data</option>
+              <option value="Design Idea">💡 Design Idea</option>
+            </select>
+          </div>
+          <div>
+            <label for="note-source" class="block text-xs font-bold uppercase text-slate-500 mb-1">Source / Team Member</label>
+            <input id="note-source" type="text" required placeholder="e.g., Dr. Matadha (Middlesex County) or Sam"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:border-teal-500" />
+          </div>
+          <div>
+            <label for="note-text" class="block text-xs font-bold uppercase text-slate-500 mb-1">Note / Observation</label>
+            <textarea id="note-text" rows="4" required placeholder="Write down key data, quotes, or experiment measurements..."
+              class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:border-teal-500"></textarea>
+          </div>
+          <button type="submit" class="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-sm transition">
+            + Save Note to Notebook
+          </button>
+        </form>
+
+        <!-- Saved Notes Display + Filter + Export -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h3 class="font-display text-lg font-bold text-slate-900">Saved Team Notes</h3>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="copyAllNotes()"
+                  class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">
+                  📋 Copy All Notes for Judging Binder
+                </button>
+                <button onclick="downloadNotesTxt()"
+                  class="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition">
+                  ⬇️ Download Notes (.txt)
+                </button>
+              </div>
+            </div>
+
+            <!-- Category Filter Pills -->
+            <div class="flex flex-wrap gap-2" id="note-filter-bar">
+              <button onclick="setNoteFilter('All')" data-filter="All" class="note-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-teal-600 text-white">All</button>
+              <button onclick="setNoteFilter('Biology Fact')" data-filter="Biology Fact" class="note-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Biology Fact</button>
+              <button onclick="setNoteFilter('Expert Quote')" data-filter="Expert Quote" class="note-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Expert Quote</button>
+              <button onclick="setNoteFilter('Test Data')" data-filter="Test Data" class="note-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Test Data</button>
+              <button onclick="setNoteFilter('Design Idea')" data-filter="Design Idea" class="note-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Design Idea</button>
+            </div>
+          </div>
+
+          <div id="notes-list" class="space-y-3">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 5: JUDGE PREP (FLL RUBRIC, 8 FLASHCARDS & 8-QUESTION QUIZ)      -->
+    <!-- =================================================================== -->
+    <section id="section-judge" class="tab-section hidden fade-in space-y-8">
+
+      <!-- FLL Innovation Project Rubric Checklist -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+              Official FLL Judging Categories
+            </span>
+            <h2 class="font-display text-2xl font-bold text-slate-900 mt-1">
+              Innovation Project Rubric Readiness Checklist
+            </h2>
+            <p class="text-sm text-slate-600">Check off items as your team prepares to score "Accomplished" and "Exceeds" across all 5 FLL pillars.</p>
+          </div>
+          <div class="w-full md:w-64 bg-slate-50 rounded-2xl p-3.5 border border-slate-200">
+            <div class="flex justify-between text-xs font-bold mb-1.5">
+              <span class="text-slate-700">Team Readiness</span>
+              <span id="rubric-progress-text" class="text-teal-700">0 / 10 (0%)</span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+              <div id="rubric-progress-bar" class="h-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="rubric-checklist-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Interactive Judge Q&A Flashcards (8 Cards) -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800">
+              5-Minute Q&amp;A Practice
+            </span>
+            <h2 class="font-display text-2xl font-bold text-slate-900 mt-1">Tough Judge Q&amp;A Flashcards</h2>
+            <p class="text-sm text-slate-600">Practice answering out loud, then click the card to flip and check the model FLL answer.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="prevFlashcard()" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm font-bold">← Prev</button>
+            <span id="flashcard-counter" class="text-sm font-bold text-slate-700 px-2">1 / 8</span>
+            <button onclick="nextFlashcard()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold">Next →</button>
+          </div>
+        </div>
+
+        <div onclick="flipFlashcard()" class="perspective cursor-pointer max-w-3xl mx-auto h-72 sm:h-64 select-none">
+          <div id="flashcard-inner" class="preserve-3d relative w-full h-full">
+            <!-- Front -->
+            <div class="backface-hidden absolute inset-0 rounded-3xl bg-gradient-to-br from-teal-600 to-emerald-700 text-white p-6 sm:p-8 flex flex-col justify-between shadow-md">
+              <div class="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-teal-100">
+                <span id="fc-category">Judge Q&amp;A</span>
+                <span>Click to Flip ↻</span>
+              </div>
+              <p id="fc-question" class="font-display text-xl sm:text-2xl font-bold text-center leading-snug"></p>
+              <div class="text-center text-xs text-teal-100">Tip: Take turns letting every teammate answer!</div>
+            </div>
+            <!-- Back -->
+            <div class="backface-hidden rotate-y-180 absolute inset-0 rounded-3xl bg-slate-900 text-white p-6 sm:p-8 flex flex-col justify-between shadow-md border-2 border-teal-500">
+              <div class="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-teal-400">
+                <span>Model Team Answer</span>
+                <span>Click to Flip ↺</span>
+              </div>
+              <p id="fc-answer" class="text-sm sm:text-base text-slate-100 text-center leading-relaxed"></p>
+              <div id="fc-tip" class="text-center text-xs font-semibold text-amber-300"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive 8-Question Knowledge Check Quiz -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-display text-2xl font-bold text-slate-900">8-Question Team Knowledge Check</h2>
+            <p class="text-sm text-slate-600">Select an answer to get immediate feedback and a scientific explanation.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div id="quiz-score-badge" class="px-4 py-2 rounded-2xl bg-teal-50 border border-teal-200 text-teal-900 font-extrabold text-sm">
+              Score: 0 / 8
+            </div>
+            <button onclick="resetQuiz()" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm font-bold text-slate-700 transition">
+              Retake Quiz
+            </button>
+          </div>
+        </div>
+
+        <div id="quiz-list" class="space-y-5">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      <div>
+        <strong>Project Tiger Shield</strong> • FIRST® LEGO® League Innovation Project Research Hub
+      </div>
+      <div>
+        100% Self-Contained Static Web App • All progress &amp; field notes save automatically in your browser.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION JAVASCRIPT                                                -->
+  <!-- ===================================================================== -->
+  <script>
+    // =========================================================================
+    // 1. TAB NAVIGATION & TOAST NOTIFICATIONS
+    // =========================================================================
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+      const activeSec = document.getElementById(`section-${tabId}`);
+      if (activeSec) activeSec.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.classList.remove('bg-teal-500', 'text-slate-950', 'shadow-md');
+        btn.classList.add('bg-slate-800/80', 'text-slate-300');
+      });
+      const activeBtn = document.getElementById(`tab-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-800/80', 'text-slate-300');
+        activeBtn.classList.add('bg-teal-500', 'text-slate-950', 'shadow-md');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const palette = type === 'success'
+        ? 'bg-slate-900 border-teal-400 text-white'
+        : 'bg-amber-950 border-amber-400 text-amber-50';
+      toast.className = `${palette} border-l-4 px-4 py-3 rounded-xl shadow-lg text-xs sm:text-sm font-semibold transition-all duration-300 translate-y-2 opacity-0`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => toast.classList.remove('translate-y-2', 'opacity-0'));
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Team Name Persistence
+    const teamNameInput = document.getElementById('team-name-input');
+    const savedTeam = localStorage.getItem('pts_team_name');
+    if (savedTeam) teamNameInput.value = savedTeam;
+    teamNameInput.addEventListener('input', () => {
+      localStorage.setItem('pts_team_name', teamNameInput.value);
+    });
+
+    // =========================================================================
+    // 2. TAB 1: INTERACTIVE 4-STAGE LIFE CYCLE EXPLORER
+    // =========================================================================
+    const lifeStages = {
+      egg: {
+        icon: '🥚',
+        duration: 'Survives Months Dry',
+        title: 'Stage 1: Drought-Resistant "Sticky" Eggs',
+        isTarget: false,
+        desc: 'Females glue individual black eggs onto the damp inner walls of containers just above the waterline. Even if the water evaporates completely or a homeowner dumps the cup out, these eggs survive drying out and freezing winter temperatures (a resting state called diapause) for months—hatching the moment rain refills the container!',
+        link: 'How Our Project Uses This: Our Smart Bti Ovitrap provides a dark, textured wooden strip that tricks females into gluing their eggs inside our trap instead of hidden gutters!'
+      },
+      larva: {
+        icon: '🐛',
+        duration: '4–7 Days in Water',
+        title: 'Stage 2: Larva ("Wigglers") — Bti Target Stage!',
+        isTarget: true,
+        desc: 'Once rain floods the sticky eggs, larvae hatch into the water and hang upside-down from the surface using a breathing tube (siphon). They feed actively on tiny organic particles in the water for 4 to 7 days—making this the exact stage where Bti stops them!',
+        link: 'How Our Project Stops Them: When larvae eat our dissolved Bti (Bacillus thuringiensis israelensis) bacteria, it disrupts their digestive system within 24 hours—turning the trap into a safe dead-end.'
+      },
+      pupa: {
+        icon: '🫧',
+        duration: '1–2 Days • Non-Feeding',
+        title: 'Stage 3: Pupa ("Tumblers")',
+        isTarget: false,
+        desc: 'Shaped like tiny commas, pupae tumble through the water when disturbed. They do not eat at all—instead, they spend 1 to 2 days transforming inside their cocoon-like shell into winged adults. Because pupae do not eat, Bti must kill them earlier during the Larva stage!',
+        link: 'Engineering Lesson: That is why our Low-Water & 30-Day Timer LED is critical—if Bti runs out before larvae eat it, they can reach the pupa stage and emerge as adults.'
+      },
+      adult: {
+        icon: '🦟',
+        duration: 'Lives 2–4 Weeks',
+        title: 'Stage 4: Adult Asian Tiger Mosquito',
+        isTarget: false,
+        desc: 'Adults emerge from the water ready to mate within days. Only female mosquitoes bite—they need protein from blood to produce batches of 50–100 eggs. Male mosquitoes drink only plant nectar and never bite people or pets!',
+        link: 'Community Impact: Stopping just ONE egg-laying female in our Smart Bti Ovitrap prevents hundreds of future daytime biters within a 200-yard neighborhood radius.'
+      }
+    };
+
+    function selectLifeStage(stageKey) {
+      const s = lifeStages[stageKey];
+      document.querySelectorAll('.stage-btn').forEach(btn => {
+        btn.classList.remove('border-teal-500', 'bg-teal-50/70', 'border-emerald-500', 'bg-emerald-50/80');
+        btn.classList.add('border-slate-200', 'bg-white');
+      });
+      const activeBtn = document.getElementById(`stage-btn-${stageKey}`);
+      if (stageKey === 'larva') {
+        activeBtn.classList.remove('border-slate-200', 'bg-white');
+        activeBtn.classList.add('border-emerald-500', 'bg-emerald-50/80');
+      } else {
+        activeBtn.classList.remove('border-slate-200', 'bg-white');
+        activeBtn.classList.add('border-teal-500', 'bg-teal-50/70');
+      }
+
+      document.getElementById('stage-icon').textContent = s.icon;
+      document.getElementById('stage-duration').textContent = s.duration;
+      document.getElementById('stage-title').textContent = s.title;
+      document.getElementById('stage-desc').textContent = s.desc;
+      document.getElementById('stage-project-link').innerHTML = `<strong>${s.link.split(':')[0]}:</strong>${s.link.substring(s.link.indexOf(':') + 1)}`;
+      document.getElementById('stage-badge').classList.toggle('hidden', !s.isTarget);
+    }
+
+    // =========================================================================
+    // 3. TAB 2: BACKYARD HIDDEN MICRO-CONTAINER SPOTTER
+    // =========================================================================
+    const backyardHotspots = [
+      { id: 'h1', icon: '〰️', name: 'Corrugated Downspout Extensions', water: '2–4 Tbsp', why: 'The ribbed accordion ridges trap hidden pockets of rainwater that stay cool, dark, and invisible to homeowners.' },
+      { id: 'h2', icon: '🥤', name: 'Bottle Caps & Litter', water: '1 Teaspoon!', why: 'An upside-down soda cap or chip wrapper holds enough rainwater for 10+ Asian tiger mosquito larvae to mature.' },
+      { id: 'h3', icon: '🪴', name: 'Flower Pot Saucers', water: '2–3 Tbsp', why: 'Watering plants refills saucers every few days—flooding sticky eggs glued to the ceramic rim.' },
+      { id: 'h4', icon: '🏠', name: 'Clogged Rain Gutters', water: 'Cups of Water', why: 'Wet decaying leaves create rich "leaf tea" that smells irresistible to egg-laying females high out of sight.' },
+      { id: 'h5', icon: '⛺', name: 'Tarp Folds & Grill Covers', water: '1/4 Cup', why: 'Loose creases on patio furniture covers, boat tarps, and pool covers create shady mini-ponds after every storm.' },
+      { id: 'h6', icon: '🛞', name: 'Old Tires & Tire Swings', water: '1–2 Cups', why: 'Dark rubber warms quickly in the sun and shields larvae from wind—the exact way this species invaded the U.S. in 1985!' },
+      { id: 'h7', icon: '🐦', name: 'Unchanged Birdbaths', water: '2–4 Cups', why: 'If birdbath water is not dumped and scrubbed weekly, sticky eggs cling to the concrete basin.' },
+      { id: 'h8', icon: '🌳', name: 'Treeholes & Bamboo Stumps', water: '2 Tbsp', why: 'Before cities existed, Asian tiger mosquitoes evolved in natural forest treeholes—making shaded tree cavities a prime spot.' }
+    ];
+
+    let foundHotspots = new Set(JSON.parse(localStorage.getItem('pts_hotspots') || '[]'));
+
+    function renderHotspots() {
+      const grid = document.getElementById('hotspot-grid');
+      grid.innerHTML = '';
+
+      backyardHotspots.forEach(item => {
+        const isFound = foundHotspots.has(item.id);
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.onclick = () => toggleHotspot(item.id);
+        card.className = `text-left p-5 rounded-2xl border-2 transition-all flex flex-col justify-between h-full ${
+          isFound
+            ? 'bg-teal-50/80 border-teal-500 shadow-sm'
+            : 'bg-slate-50 border-slate-200 hover:border-amber-400 hover:bg-white'
+        }`;
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-2xl">${item.icon}</span>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${isFound ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-600'}">
+                ${isFound ? '✓ Inspected' : 'Tap to Inspect'}
+              </span>
+            </div>
+            <h3 class="font-display font-bold text-slate-900 text-sm sm:text-base">${item.name}</h3>
+            ${isFound
+              ? `<p class="text-xs text-slate-700 mt-2 leading-relaxed">${item.why}</p>
+                 <div class="mt-3 inline-block text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-lg">Water Needed: ${item.water}</div>`
+              : `<p class="text-xs text-slate-500 mt-1.5">Click to reveal why mosquitoes breed here...</p>`
+            }
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      document.getElementById('hotspot-counter').textContent = `${foundHotspots.size} / ${backyardHotspots.length} Discovered`;
+    }
+
+    function toggleHotspot(id) {
+      if (!foundHotspots.has(id)) {
+        foundHotspots.add(id);
+        localStorage.setItem('pts_hotspots', JSON.stringify([...foundHotspots]));
+        if (foundHotspots.size === backyardHotspots.length) {
+          showToast('Awesome! You found all 8 backyard breeding hotspots!');
+        }
+      }
+      renderHotspots();
+    }
+
+    // =========================================================================
+    // 4. TAB 3: SMART OVITRAP LAB & LIVE SIMULATOR
+    // =========================================================================
+    const labComponents = {
+      1: {
+        title: 'Slotted Squirrel-Proof Mesh Lid & Matte-Black Cup',
+        desc: 'Asian tiger mosquitoes visually hunt for dark, shaded cavities. The matte-black HDPE container acts as a magnet, while the V2 slotted lid lets mosquitoes fly in to lay eggs while blocking squirrels, pets, and falling leaves.'
+      },
+      2: {
+        title: '1/4-Inch Rain Overflow Drainage Holes',
+        desc: 'Drilled 1.5 inches below the top rim, these holes drain excess water during heavy summer rainstorms so rainwater never floods the sensor electronics or washes out the Bti briquette.'
+      },
+      3: {
+        title: 'Textured Wooden / Cellulose Egg-Laying Strip',
+        desc: 'Females prefer gluing sticky eggs onto damp, rough walls just above the waterline. Our removable wooden tongue depressor or seed-germination strip gives them the ideal landing target.'
+      },
+      4: {
+        title: 'Bottom Bti Biopesticide Chamber',
+        desc: 'Holds a quarter-piece of an EPA-approved Mosquito Dunk (Bacillus thuringiensis israelensis). It slowly dissolves for 30 days, killing only mosquito larvae while staying 100% harmless to kids, pets, birds, and bees.'
+      },
+      5: {
+        title: 'Two Copper Water-Level Probe Wires',
+        desc: 'Simple stripped copper jumper wires act as a conductivity switch. When water covers both tips (above 30%), electrical current flows. If water evaporates below 30%, the circuit breaks and triggers the Red Alert LED!'
+      },
+      6: {
+        title: 'Smart Microcontroller & Virtual Status LED',
+        desc: 'Built with a BBC micro:bit or LEGO SPIKE Prime Hub in our prototype. It reads the water probe and counts down a 30-day Bti replacement timer, flashing Red for low water or glowing Amber at Day 30.'
+      }
+    };
+
+    function selectLabComponent(num) {
+      const c = labComponents[num];
+      document.getElementById('comp-num').textContent = num;
+      document.getElementById('comp-title').textContent = c.title;
+      document.getElementById('comp-desc').textContent = c.desc;
+    }
+
+    let isHeavyRain = false;
+
+    function updateSimulator() {
+      const waterSlider = document.getElementById('water-slider');
+      const daysSlider = document.getElementById('days-slider');
+      let waterPct = parseInt(waterSlider.value, 10);
+      const days = parseInt(daysSlider.value, 10);
+
+      // If heavy rain is active, cap water right at overflow holes (78%)
+      if (isHeavyRain && waterPct < 78) {
+        waterPct = 78;
+        waterSlider.value = 78;
+      } else if (waterPct > 78) {
+        // Visually show overflow streams when user drags above 78%
+        document.getElementById('svg-rain-overflow').classList.remove('hidden');
+        waterPct = 78; // Physically drains at 78% overflow hole level!
+      } else if (!isHeavyRain) {
+        document.getElementById('svg-rain-overflow').classList.add('hidden');
+      }
+
+      document.getElementById('water-val-badge').textContent = `${waterSlider.value}%${parseInt(waterSlider.value, 10) > 78 ? ' (Draining @ 78%)' : ''}`;
+      document.getElementById('days-val-badge').textContent = `Day ${days} / 30`;
+
+      // Animate SVG Water Rect (Cup interior spans y=82 [100%] to y=306 [0%], height=224)
+      const cupBottom = 306;
+      const cupHeight = 224;
+      const fillHeight = (waterPct / 100) * cupHeight;
+      const waterY = cupBottom - fillHeight;
+
+      const waterRect = document.getElementById('svg-water-rect');
+      const waterLine = document.getElementById('svg-water-line');
+      waterRect.setAttribute('y', waterY.toFixed(1));
+      waterRect.setAttribute('height', fillHeight.toFixed(1));
+      waterLine.setAttribute('y1', waterY.toFixed(1));
+      waterLine.setAttribute('y2', waterY.toFixed(1));
+      waterLine.style.opacity = waterPct > 0 ? '1' : '0';
+
+      // Evaluate LED Status Logic
+      const svgLed = document.getElementById('svg-led-circle');
+      const svgLedLabel = document.getElementById('svg-led-label');
+      const ledCard = document.getElementById('sim-led-card');
+      const ledDot = document.getElementById('sim-led-dot');
+      const ledHeading = document.getElementById('sim-led-heading');
+      const ledSub = document.getElementById('sim-led-sub');
+
+      // Reset blink class
+      svgLed.classList.remove('animate-led-red');
+      ledDot.classList.remove('animate-led-red');
+
+      if (waterPct < 30) {
+        // FLASHING RED ALERT
+        svgLed.setAttribute('fill', '#ef4444');
+        svgLed.classList.add('animate-led-red');
+        svgLedLabel.setAttribute('fill', '#ef4444');
+        svgLedLabel.textContent = 'LOW WATER!';
+
+        ledCard.className = 'rounded-2xl p-4 border-2 border-rose-500 bg-rose-50 flex items-center gap-4 transition-all';
+        ledDot.className = 'w-10 h-10 rounded-full bg-rose-600 shrink-0 shadow-md border-4 border-white animate-led-red';
+        ledHeading.className = 'font-display font-bold text-rose-900 text-base';
+        ledHeading.textContent = 'FLASHING RED: ALERT — Low Water!';
+        ledSub.className = 'text-xs text-rose-800 mt-0.5';
+        ledSub.textContent = days >= 30
+          ? 'Water dropped below the copper probes AND 30 days elapsed! Refill water and replace the Bti puck immediately.'
+          : 'Water dropped below the copper probes (<30%). Refill water before dormant sticky eggs hatch on the next rain!';
+      } else if (days >= 30) {
+        // AMBER ALERT
+        svgLed.setAttribute('fill', '#f59e0b');
+        svgLedLabel.setAttribute('fill', '#f59e0b');
+        svgLedLabel.textContent = 'SWAP BTI!';
+
+        ledCard.className = 'rounded-2xl p-4 border-2 border-amber-500 bg-amber-50 flex items-center gap-4 transition-all';
+        ledDot.className = 'w-10 h-10 rounded-full bg-amber-500 shrink-0 shadow-md border-4 border-white';
+        ledHeading.className = 'font-display font-bold text-amber-900 text-base';
+        ledHeading.textContent = 'AMBER: ALERT — 30-Day Timer Up!';
+        ledSub.className = 'text-xs text-amber-800 mt-0.5';
+        ledSub.textContent = 'Water level is OK, but the Bti briquette has reached 30 days. Drop in a fresh quarter Mosquito Dunk to keep larvae eliminated.';
+      } else {
+        // GREEN ACTIVE
+        svgLed.setAttribute('fill', '#10b981');
+        svgLedLabel.setAttribute('fill', '#10b981');
+        svgLedLabel.textContent = isHeavyRain ? 'DRAINING OK' : 'ACTIVE OK';
+
+        ledCard.className = 'rounded-2xl p-4 border-2 border-emerald-400 bg-emerald-50 flex items-center gap-4 transition-all';
+        ledDot.className = 'w-10 h-10 rounded-full bg-emerald-500 shrink-0 shadow-md border-4 border-white';
+        ledHeading.className = 'font-display font-bold text-emerald-900 text-base';
+        ledHeading.textContent = isHeavyRain
+          ? 'GREEN: Heavy Rain Safely Draining!'
+          : 'GREEN: Active & Safe — Bti Dissolving';
+        ledSub.className = 'text-xs text-emerald-800 mt-0.5';
+        ledSub.textContent = isHeavyRain
+          ? '1/4-inch overflow holes are draining excess rainwater safely below the smart electronics!'
+          : 'Water bridges both copper probes and Bti briquette is actively eliminating any hatching mosquito larvae.';
+      }
+    }
+
+    function toggleHeavyRain() {
+      isHeavyRain = !isHeavyRain;
+      const btn = document.getElementById('btn-heavy-rain');
+      document.getElementById('svg-rain-top').classList.toggle('hidden', !isHeavyRain);
+      document.getElementById('svg-rain-overflow').classList.toggle('hidden', !isHeavyRain);
+
+      if (isHeavyRain) {
+        document.getElementById('water-slider').value = 88;
+        btn.innerHTML = '<span>☀️</span> Stop Heavy Rain';
+        btn.classList.replace('bg-sky-600', 'bg-slate-800');
+        btn.classList.replace('hover:bg-sky-700', 'hover:bg-slate-900');
+        showToast('Heavy rain active! Watch the 1/4-inch overflow holes protect the electronics.');
+      } else {
+        document.getElementById('water-slider').value = 72;
+        btn.innerHTML = '<span>🌧️</span> Simulate Heavy Rain';
+        btn.classList.replace('bg-slate-800', 'bg-sky-600');
+        btn.classList.replace('hover:bg-slate-900', 'hover:bg-sky-700');
+      }
+      updateSimulator();
+    }
+
+    function resetSimulator() {
+      isHeavyRain = false;
+      document.getElementById('svg-rain-top').classList.add('hidden');
+      document.getElementById('svg-rain-overflow').classList.add('hidden');
+      const btn = document.getElementById('btn-heavy-rain');
+      btn.innerHTML = '<span>🌧️</span> Simulate Heavy Rain';
+      btn.classList.remove('bg-slate-800', 'hover:bg-slate-900');
+      btn.classList.add('bg-sky-600', 'hover:bg-sky-700');
+      document.getElementById('water-slider').value = 65;
+      document.getElementById('days-slider').value = 10;
+      updateSimulator();
+    }
+
+    // =========================================================================
+    // 5. TAB 4: INTERVIEW BANK & PERSISTENT FIELD NOTES
+    // =========================================================================
+    const interviewQuestions = [
+      { group: 'Real-World Bottlenecks', q: 'When your inspectors get calls for Asian tiger mosquitoes, what are the top 3 hidden breeding spots homeowners almost always miss?', tip: 'Judges love hearing real field stats (like corrugated downspout pipes or tarp folds) straight from a county inspector.' },
+      { group: 'Real-World Bottlenecks', q: 'Why do standard county spray trucks work well for native marsh mosquitoes, yet struggle against Asian tiger mosquitoes?', tip: 'Confirms your core Problem Statement: daytime biting + fenced private backyards.' },
+      { group: 'Real-World Bottlenecks', q: 'How much of your battle is against mosquito biology versus getting neighbors to cooperate on emptying standing water?', tip: 'Proves your team understands the human-behavior side of the problem, not just science.' },
+      { group: 'Tech & Data Gaps', q: 'What traps or sensors do you currently use to monitor Aedes albopictus, and what takes your team the most time when checking them?', tip: 'Uncovers operational bottlenecks that justify adding automated alerts or QR hotspot reporting.' },
+      { group: 'Tech & Data Gaps', q: 'How do you decide when to treat neighborhoods in early spring before populations explode in July?', tip: 'Gives your team advanced vocabulary (like temperature degree-days and early Bti larviciding).' },
+      { group: 'Tech & Data Gaps', q: 'Are you using newer biological controls like Wolbachia-infected sterile males, and what makes them hard to scale?', tip: 'Shows judges you researched cutting-edge existing solutions and understand cost/scaling trade-offs.' },
+      { group: 'Prototype Feedback', q: 'We designed a low-cost Smart Bti Ovitrap with a water-level alert LED. If you placed this in a real yard, what would make it fail?', tip: 'Asking for harsh critique is the #1 way to earn a Level 4 ("Exceeds") on the FLL Iterate rubric!' },
+      { group: 'Prototype Feedback', q: 'How can our FLL team safely test our trap design at school or home without raising or releasing live mosquitoes?', tip: 'Validates your mosquito-free bench testing plan with an expert stamp of approval.' }
+    ];
+
+    function renderInterviewBank() {
+      const container = document.getElementById('interview-bank');
+      container.innerHTML = '';
+      interviewQuestions.forEach((item, idx) => {
+        const badgeColor = item.group === 'Real-World Bottlenecks'
+          ? 'bg-rose-100 text-rose-800'
+          : item.group === 'Tech & Data Gaps'
+            ? 'bg-sky-100 text-sky-800'
+            : 'bg-emerald-100 text-emerald-800';
+
+        const details = document.createElement('details');
+        details.className = 'group rounded-2xl border border-slate-200 bg-slate-50/60 open:bg-white open:border-teal-400 transition';
+        details.innerHTML = `
+          <summary class="cursor-pointer list-none p-4 flex items-start justify-between gap-3">
+            <div class="space-y-1">
+              <span class="inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${badgeColor}">${item.group}</span>
+              <div class="font-bold text-slate-900 text-sm sm:text-base">${idx + 1}. "${item.q}"</div>
+            </div>
+            <span class="text-slate-400 group-open:rotate-180 transition-transform text-lg shrink-0">⌄</span>
+          </summary>
+          <div class="px-4 pb-4 pt-1 text-xs sm:text-sm text-teal-900 bg-teal-50/50 rounded-b-2xl border-t border-teal-100">
+            <strong>💡 Why FLL Judges Love This Answer:</strong> ${item.tip}
+          </div>
+        `;
+        container.appendChild(details);
+      });
+    }
+
+    // Persistent Field Notes
+    const starterNotes = [
+      {
+        id: 'starter_1',
+        category: 'Biology Fact',
+        source: 'CDC & Rutgers Vector Biology',
+        text: 'Asian tiger mosquitoes only fly ~200 yards in their entire lives and glue drought-resistant sticky eggs to tiny backyard containers. Treating micro-containers stops them right at the source.',
+        date: 'Starter Note'
+      },
+      {
+        id: 'starter_2',
+        category: 'Design Idea',
+        source: 'Team Brainstorm (V1 → V2)',
+        text: 'Adding two 1/4-inch overflow holes 1.5 inches below the rim keeps rain from flooding our micro:bit water probes, and a slotted lid keeps squirrels and falling leaves out.',
+        date: 'Starter Note'
+      }
+    ];
+
+    let notes = JSON.parse(localStorage.getItem('pts_notes') || 'null') || starterNotes;
+    let currentNoteFilter = 'All';
+
+    function renderNotes() {
+      const container = document.getElementById('notes-list');
+      container.innerHTML = '';
+
+      const filtered = currentNoteFilter === 'All'
+        ? notes
+        : notes.filter(n => n.category === currentNoteFilter);
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="bg-white rounded-2xl p-6 border border-dashed border-slate-300 text-center text-sm text-slate-500">No notes in this category yet. Add one on the left!</div>`;
+        return;
+      }
+
+      filtered.forEach(note => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2';
+        card.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-100 text-teal-800">${note.category}</span>
+            <div class="flex items-center gap-3 text-xs text-slate-400">
+              <span><strong class="text-slate-600">${escapeHtml(note.source)}</strong> • ${note.date}</span>
+              <button onclick="deleteNote('${note.id}')" class="text-rose-500 hover:text-rose-700 font-bold">Delete</button>
+            </div>
+          </div>
+          <p class="text-sm text-slate-700 leading-relaxed">${escapeHtml(note.text)}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    function addFieldNote(e) {
+      e.preventDefault();
+      const category = document.getElementById('note-category').value;
+      const source = document.getElementById('note-source').value.trim();
+      const text = document.getElementById('note-text').value.trim();
+      if (!source || !text) return;
+
+      notes.unshift({
+        id: 'note_' + Date.now(),
+        category,
+        source,
+        text,
+        date: new Date().toLocaleDateString()
+      });
+      localStorage.setItem('pts_notes', JSON.stringify(notes));
+      e.target.reset();
+      renderNotes();
+      showToast('Note saved to your Team Field Notebook!');
+    }
+
+    function deleteNote(id) {
+      notes = notes.filter(n => n.id !== id);
+      localStorage.setItem('pts_notes', JSON.stringify(notes));
+      renderNotes();
+      showToast('Note removed.', 'warn');
+    }
+
+    function setNoteFilter(filter) {
+      currentNoteFilter = filter;
+      document.querySelectorAll('.note-filter-btn').forEach(btn => {
+        const isActive = btn.dataset.filter === filter;
+        btn.className = isActive
+          ? 'note-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-teal-600 text-white'
+          : 'note-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200';
+      });
+      renderNotes();
+    }
+
+    function formatNotesText() {
+      const team = teamNameInput.value || 'FLL Team';
+      let out = `${team.toUpperCase()} — FLL INNOVATION PROJECT RESEARCH & FIELD NOTES\n`;
+      out += `Project: Smart Bti Ovitrap for Invasive Asian Tiger Mosquito Control\n`;
+      out += `Exported: ${new Date().toLocaleString()}\n`;
+      out += `==================================================================\n\n`;
+      notes.forEach((n, idx) => {
+        out += `${idx + 1}. [${n.category}] (${n.source} — ${n.date})\n`;
+        out += `   ${n.text}\n\n`;
+      });
+      return out;
+    }
+
+    function copyAllNotes() {
+      const text = formatNotesText();
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Copied all notes! Paste them straight into your Judging Binder.');
+    }
+
+    function downloadNotesTxt() {
+      const blob = new Blob([formatNotesText()], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'FLL_Tiger_Shield_Research_Notes.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Downloaded FLL_Tiger_Shield_Research_Notes.txt!');
+    }
+
+    // =========================================================================
+    // 6. TAB 5: FLL RUBRIC CHECKLIST, 8 FLASHCARDS & 8-QUESTION QUIZ
+    // =========================================================================
+    const rubricItems = [
+      { id: 'r1', pillar: 'Identify', text: 'Define a narrow problem statement (hidden backyard micro-containers & daytime biting).' },
+      { id: 'r2', pillar: 'Identify', text: 'Cite credible sources (CDC, EPA, Rutgers, and an expert entomologist interview).' },
+      { id: 'r3', pillar: 'Design', text: 'Explain why existing solutions (spray trucks, fogging, unmonitored traps) fall short.' },
+      { id: 'r4', pillar: 'Design', text: 'Document team brainstorming and show every teammate had a clear project role.' },
+      { id: 'r5', pillar: 'Create', text: 'Build a working physical prototype (Smart Bti Ovitrap) with labeled parts & cost breakdown.' },
+      { id: 'r6', pillar: 'Create', text: 'Clearly explain the innovative twist (copper low-water sensor + 30-day Bti timer LED).' },
+      { id: 'r7', pillar: 'Iterate', text: 'Share the prototype with users/experts and collect real-world feedback.' },
+      { id: 'r8', pillar: 'Iterate', text: 'Show clear Version 1 vs. Version 2 upgrades (overflow holes, slotted lid, QR code).' },
+      { id: 'r9', pillar: 'Communicate', text: 'Practice the live presentation strictly under 5 minutes with every teammate speaking.' },
+      { id: 'r10', pillar: 'Communicate', text: 'Prepare tabbed Q&A binder with test charts, expert quotes, and unit cost table.' }
+    ];
+
+    let rubricDone = new Set(JSON.parse(localStorage.getItem('pts_rubric') || '["r1","r3"]'));
+
+    function renderRubric() {
+      const grid = document.getElementById('rubric-checklist-grid');
+      grid.innerHTML = '';
+
+      rubricItems.forEach(item => {
+        const checked = rubricDone.has(item.id);
+        const label = document.createElement('label');
+        label.className = `flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer transition ${
+          checked ? 'bg-emerald-50/70 border-emerald-300 text-slate-500' : 'bg-slate-50 border-slate-200 hover:border-teal-400 text-slate-800'
+        }`;
+        label.innerHTML = `
+          <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleRubric('${item.id}')"
+            class="mt-1 w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer shrink-0" />
+          <div>
+            <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-white border border-slate-200 text-teal-700 mb-1">${item.pillar}</span>
+            <div class="text-xs sm:text-sm font-medium ${checked ? 'line-through' : ''}">${item.text}</div>
+          </div>
+        `;
+        grid.appendChild(label);
+      });
+
+      const pct = Math.round((rubricDone.size / rubricItems.length) * 100);
+      document.getElementById('rubric-progress-text').textContent = `${rubricDone.size} / ${rubricItems.length} (${pct}%)`;
+      document.getElementById('rubric-progress-bar').style.width = `${pct}%`;
+      document.getElementById('header-readiness-badge').textContent = `${pct}%`;
+    }
+
+    function toggleRubric(id) {
+      if (rubricDone.has(id)) rubricDone.delete(id);
+      else rubricDone.add(id);
+      localStorage.setItem('pts_rubric', JSON.stringify([...rubricDone]));
+      renderRubric();
+    }
+
+    // 8 Judge Q&A Flashcards
+    const flashcards = [
+      { cat: 'Safety & Environment', q: 'Is Bti safe for pets, kids, birds, and honeybees?', a: 'Yes! Bti (Bacillus thuringiensis israelensis) is an EPA-approved natural soil bacterium that ONLY disrupts the digestive system of mosquito and blackfly larvae. It is completely harmless to humans, dogs, birds, fish, and pollinators—plus our V2 slotted lid keeps pets out.', tip: '💡 Cite the EPA Bti Fact Sheet!' },
+      { cat: 'Engineering & Weather', q: 'What happens if it rains heavily? Won’t your electronics get ruined?', a: 'We solved that in Version 2! We drilled two 1/4-inch overflow holes 1.5 inches below the top rim so excess rainwater drains out the sides before it can ever reach the sensor housing.', tip: '💡 Offer to show them your Heavy Rain Simulation!' },
+      { cat: 'Safe Testing', q: 'How did your team test this prototype without raising live mosquitoes?', a: 'We ran three safe, measurable bench tests: (1) an evaporation timing test in a sunny window to verify our Red Alert LED, (2) a 2-cup heavy rain pour test for our overflow holes, and (3) a dark-vs-light container visual check.', tip: '💡 Judges love measurable data charts!' },
+      { cat: 'Iteration (Rubric Key)', q: 'What specifically changed between Version 1 and Version 2?', a: 'After testing Version 1 and getting feedback, we realized rain could flood the open cup and squirrels/leaves could get in. In Version 2 we added 1/4-inch overflow holes, a slotted mesh lid, a 30-day Amber Bti timer, and a neighborhood QR sticker.', tip: '💡 Bring BOTH V1 and V2 to the judging table!' },
+      { cat: 'Feasibility & Cost', q: 'How much does one Smart Bti Ovitrap cost to make?', a: 'About $6.75 per unit in production: $1.25 for the recycled black HDPE cup and lid, $0.25 for the egg strip and oak-leaf lure, $0.75 for a 30-day Bti briquette, and $4.50 for a low-power moisture/timer LED module.', tip: '💡 Compare $6.75 to $70+ per commercial yard spray!' },
+      { cat: 'Problem Definition', q: 'Why don’t standard county mosquito spray trucks already solve this?', a: 'County trucks spray streets at dusk, but Asian tiger mosquitoes bite aggressively during the daytime and breed in tiny hidden micro-containers (like bottle caps and gutter pipes) inside fenced backyards where trucks can’t reach.', tip: '💡 Mention their short ~200-yard flight range!' },
+      { cat: 'Innovation Twist', q: 'Ovitraps already exist—what makes your design innovative?', a: 'Standard unmonitored ovitraps turn into mosquito factories if a homeowner forgets to refill them or replace the larvicide. Our copper water-level probes and 30-day timer LED alert homeowners BEFORE the trap fails.', tip: '💡 Clearly contrast existing traps vs. your smart alerts!' },
+      { cat: 'Real-World Impact', q: 'Who would use this and how could it help a whole town?', a: 'Homeowners, schools, and County Mosquito Control Commissions can deploy these low-cost traps in backyard hotspots. Because Asian tiger mosquitoes only fly ~200 yards, protecting yards breaks the local breeding cycle without harming bees.', tip: '💡 Mention how neighbors can scan the lid QR code!' }
+    ];
+
+    let fcIndex = 0;
+    let fcFlipped = false;
+
+    function updateFlashcard() {
+      const card = flashcards[fcIndex];
+      document.getElementById('fc-category').textContent = card.cat;
+      document.getElementById('fc-question').textContent = card.q;
+      document.getElementById('fc-answer').textContent = card.a;
+      document.getElementById('fc-tip').textContent = card.tip;
+      document.getElementById('flashcard-counter').textContent = `${fcIndex + 1} / ${flashcards.length}`;
+      if (fcFlipped) {
+        document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+        fcFlipped = false;
+      }
+    }
+
+    function flipFlashcard() {
+      fcFlipped = !fcFlipped;
+      document.getElementById('flashcard-inner').classList.toggle('rotate-y-180');
+    }
+    function nextFlashcard() { fcIndex = (fcIndex + 1) % flashcards.length; updateFlashcard(); }
+    function prevFlashcard() { fcIndex = (fcIndex - 1 + flashcards.length) % flashcards.length; updateFlashcard(); }
+
+    // 8-Question Knowledge Check Quiz
+    const quizData = [
+      {
+        q: '1. How did the Asian tiger mosquito (Aedes albopictus) first arrive in the continental USA in 1985?',
+        options: ['In shipments of used tires arriving in Houston, Texas', 'Migrating across the Rocky Mountains', 'Released from a zoo'],
+        correct: 0,
+        exp: 'Dormant eggs hitchhiked inside rainwater trapped in imported used tires arriving in Houston, TX in 1985.'
+      },
+      {
+        q: '2. Which visual trait is the #1 clue to identify an Asian tiger mosquito?',
+        options: ['Solid tan wings and brown legs', 'A single silver-white dorsal stripe down its black back and black-and-white banded legs', 'Bright yellow antennae'],
+        correct: 1,
+        exp: 'Its single bright white stripe down the center of the black thorax and striped "tiger" legs make it easy to spot.'
+      },
+      {
+        q: '3. Which stage of the mosquito life cycle does Bti (Bacillus thuringiensis israelensis) target?',
+        options: ['Adult mosquitoes flying in the air', 'Pupae ("tumblers")', 'Larvae ("wigglers") feeding in the water'],
+        correct: 2,
+        exp: 'Only larvae eat the dissolved Bti bacteria in water. Pupae do not eat, which is why stopping them at the Larva stage is essential!'
+      },
+      {
+        q: '4. Why does simply dumping water out of a flower pot saucer often fail to stop Asian tiger mosquitoes?',
+        options: ['Females glue drought-resistant sticky eggs to the walls that survive dry conditions until the next rain', 'The eggs float away into the clouds', 'The larvae can walk across dry grass'],
+        correct: 0,
+        exp: 'Sticky eggs glued above the waterline survive drying out and even winter cold (diapause) for months.'
+      },
+      {
+        q: '5. Which Asian tiger mosquitoes actually bite humans and pets?',
+        options: ['Both males and females', 'Only females (they need blood protein to make eggs; males drink plant nectar)', 'Only males'],
+        correct: 1,
+        exp: 'Male mosquitoes never bite! Only females bite to gather protein for producing eggs.'
+      },
+      {
+        q: '6. In our Smart Bti Ovitrap simulator, what does a FLASHING RED LED mean?',
+        options: ['The trap is full of rainwater', 'Low water alert (<30%) — refill before dormant eggs hatch on the next rain', 'Time to paint the cup'],
+        correct: 1,
+        exp: 'When water drops below the two copper probes, the circuit breaks and flashes Red so homeowners refill it before it dries out.'
+      },
+      {
+        q: '7. Why did we add 1/4-inch holes 1.5 inches below the rim in Version 2 of our prototype?',
+        options: ['To drain excess rainwater safely below the smart sensor electronics', 'To make the cup lighter', 'To let birds drink from the side'],
+        correct: 0,
+        exp: 'Overflow holes prevent heavy summer rainstorms from flooding the electronics or washing out the Bti puck.'
+      },
+      {
+        q: '8. How long is a FIRST LEGO League (FLL) Innovation Project live presentation before Q&A?',
+        options: ['10 minutes', 'Strictly 5 minutes (including setup)', '2 minutes'],
+        correct: 1,
+        exp: 'FLL teams get strictly 5 minutes to present (including setup) followed by 5 minutes of live Q&A with judges.'
+      }
+    ];
+
+    let quizAnswers = {};
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-list');
+      container.innerHTML = '';
+
+      quizData.forEach((item, qIdx) => {
+        const chosen = quizAnswers[qIdx];
+        const card = document.createElement('div');
+        card.className = 'p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3';
+
+        let optsHtml = '';
+        item.options.forEach((opt, oIdx) => {
+          let cls = 'bg-white border-slate-200 hover:border-teal-500 text-slate-700';
+          if (chosen !== undefined) {
+            if (oIdx === item.correct) cls = 'bg-emerald-100 border-emerald-500 text-emerald-950 font-bold';
+            else if (oIdx === chosen) cls = 'bg-rose-100 border-rose-500 text-rose-950';
+          }
+          optsHtml += `
+            <button type="button" onclick="answerQuiz(${qIdx}, ${oIdx})"
+              class="w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm transition flex items-center justify-between gap-2 ${cls}">
+              <span>${opt}</span>
+              ${chosen !== undefined && oIdx === item.correct ? '<span class="shrink-0">✅</span>' : ''}
+              ${chosen === oIdx && chosen !== item.correct ? '<span class="shrink-0">❌</span>' : ''}
+            </button>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="font-bold text-slate-900 text-sm sm:text-base">${item.q}</div>
+          <div class="space-y-2">${optsHtml}</div>
+          ${chosen !== undefined
+            ? `<div class="p-3 rounded-xl text-xs font-medium ${chosen === item.correct ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-amber-50 text-amber-900 border border-amber-200'}">
+                 <strong>${chosen === item.correct ? 'Correct!' : 'Good try!'}</strong> ${item.exp}
+               </div>`
+            : ''
+          }
+        `;
+        container.appendChild(card);
+      });
+
+      let score = 0;
+      Object.keys(quizAnswers).forEach(k => {
+        if (quizAnswers[k] === quizData[k].correct) score++;
+      });
+      document.getElementById('quiz-score-badge').textContent = `Score: ${score} / ${quizData.length}`;
+    }
+
+    function answerQuiz(qIdx, oIdx) {
+      quizAnswers[qIdx] = oIdx;
+      renderQuiz();
+    }
+
+    function resetQuiz() {
+      quizAnswers = {};
+      renderQuiz();
+      showToast('Quiz reset! Try for 8/8!');
+    }
+
+    // =========================================================================
+    // 7. INITIALIZATION ON WINDOW LOAD
+    // =========================================================================
+    window.onload = function () {
+      selectLifeStage('egg');
+      renderHotspots();
+      updateSimulator();
+      renderInterviewBank();
+      renderNotes();
+      renderRubric();
+      updateFlashcard();
+      renderQuiz();
+    };
+  </script>
+</body>
+</html>
